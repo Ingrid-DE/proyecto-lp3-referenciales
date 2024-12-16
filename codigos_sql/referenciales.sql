@@ -103,14 +103,14 @@ CREATE TABLE
 CREATE TABLE
 	agenda_medicas(
 		id_agenda_medica serial PRIMARY KEY,
-		id_medico INTEGER NOT NULL,
+		id_persona INTEGER NOT NULL,
 		id_especialidad INTEGER NOT NULL,
 		id_turno INTEGER NOT NULL,
    		id_dia INTEGER NOT NULL,
     	hora_inicio TIME NOT NULL,
     	hora_fin TIME NOT NULL,
 		id_sala_atencion INTEGER NOT NULL,
-		FOREIGN KEY(id_medico) REFERENCES medicos(id_medico)
+		FOREIGN KEY(id_persona) REFERENCES personas(id_persona)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
 		FOREIGN KEY(id_especialidad) REFERENCES especialidades(id_especialidad)
 		ON DELETE RESTRICT ON UPDATE CASCADE,

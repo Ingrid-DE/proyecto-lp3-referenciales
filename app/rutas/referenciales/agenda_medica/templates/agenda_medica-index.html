@@ -395,18 +395,13 @@ Agenda Médica
     $('#btnAgregar').on('click', function(){
       $('#modalTitle').text("Agregar una agenda médica");
       $('#txtIdAgenda_medica').val("");
-      $('#id_persona').val("");
       $('#txtPersona').val("");
       $('#txtEspecialidad').val("");
-      $('#id_especialidad').val("");
       $('#txtDia').val("");
-      $('#id_dia').val("");
       $('#txtTurno').val("");
-      $('#id_turno').val("");
       $('#txtHoraInicio').val("");
       $('#txtHoraFin').val("");
       $('#txtSala_atencion').val("");
-      $('#id_sala_atencion').val("");
       $('#modalFormulario').modal();
     });
   }
@@ -492,11 +487,11 @@ Agenda Médica
             $('#txtIdAgenda_medica').val(data.data.id_agenda_medica);
             $('#txtPersona').val(data.data.nombre+" "+data.data.apellido);
             $('#id_persona').val(data.data.id_persona);
-            $('#txtEspecialidad').val(data.data.descripcion);
+            $('#txtEspecialidad').val(data.data.especialidad);
             $('#id_especialidad').val(data.data.id_especialidad);
-            $('#txtDia').val(data.data.descripcion);
+            $('#txtDia').val(data.data.dia);
             $('#id_dia').val(data.data.id_dia);
-            $('#txtTurno').val(data.data.descripcion);
+            $('#txtTurno').val(data.data.turno);
             $('#id_turno').val(data.data.id_turno);
             $('#txtHoraInicio').val(data.data.hora_inicio);
             $('#txtHoraFin').val(data.data.hora_fin);
