@@ -28,6 +28,13 @@ CREATE TABLE
 		, descripcion varchar(60) UNIQUE
 	);
 
+CREATE TABLE usuarios(
+    id_usuario INTEGER PRIMARY KEY,
+    nickname TEXT NOT NULL,
+    clave TEXT NOT NULL,
+    estado BOOLEAN NOT NULL
+);
+
 
 CREATE TABLE 
 	personas(

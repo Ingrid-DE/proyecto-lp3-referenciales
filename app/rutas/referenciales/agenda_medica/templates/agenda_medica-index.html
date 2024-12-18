@@ -214,7 +214,6 @@ Agenda Médica
 
 {% block js %}
 <script> 
-
   const initDatatable = () => {
     $('#tbl').DataTable({
       language: {
@@ -272,7 +271,7 @@ Agenda Médica
   }
 
   const initDatatablee= () => {
-    $('#tblEspcialidad').DataTable({
+    $('#tblEspecialidad').DataTable({
       language: {
         url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
       },
@@ -495,7 +494,7 @@ Agenda Médica
             $('#id_turno').val(data.data.id_turno);
             $('#txtHoraInicio').val(data.data.hora_inicio);
             $('#txtHoraFin').val(data.data.hora_fin);
-            $('#txtSala_atencion').val(data.data.nombre);
+            $('#txtSala_atencion').val(data.data.sala_atencion);
             $('#id_sala_atencion').val(data.data.id_sala_atencion);
             $('#modalFormulario').modal();
           });

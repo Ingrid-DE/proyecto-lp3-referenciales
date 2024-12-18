@@ -45,17 +45,17 @@ class Agenda_medicaDao:
                     "id_agenda_medica": agenda_medicaEncontrada[0],
                     "nombre": agenda_medicaEncontrada[1],
                     "apellido": agenda_medicaEncontrada[2],
-                    "especialidad": agenda_medicaEncontrada[4],
-                    "dia": agenda_medicaEncontrada[5],
-                    "turno": agenda_medicaEncontrada[6],
-                    "hora_inicio": agenda_medicaEncontrada[7],
-                    "hora_fin": agenda_medicaEncontrada[8],
-                    "sala_atencion": agenda_medicaEncontrada[9],
-                    "id_persona": agenda_medicaEncontrada[10],
-                    "id_especialidad": agenda_medicaEncontrada[11],
-                    "id_dia": agenda_medicaEncontrada[12],
-                    "id_turno": agenda_medicaEncontrada[13],
-                    "id_sala_atencion": agenda_medicaEncontrada[14]
+                    "especialidad": agenda_medicaEncontrada[3],
+                    "dia": agenda_medicaEncontrada[4],
+                    "turno": agenda_medicaEncontrada[5],
+                    "hora_inicio": agenda_medicaEncontrada[6],
+                    "hora_fin": agenda_medicaEncontrada[7],
+                    "sala_atencion": agenda_medicaEncontrada[8],
+                    "id_persona": agenda_medicaEncontrada[9],
+                    "id_especialidad": agenda_medicaEncontrada[10],
+                    "id_dia": agenda_medicaEncontrada[11],
+                    "id_turno": agenda_medicaEncontrada[12],
+                    "id_sala_atencion": agenda_medicaEncontrada[13]
                     
                 }
             else:
@@ -67,15 +67,15 @@ class Agenda_medicaDao:
             cur.close()
             con.close()
 
-    def guardarAgenda_medica(self,id_persona,id_especialidad,id_dia,id_turno,hora_inicio, hora_fin,id_sala_atencion):
+    def guardarAgenda_medica(self, id_persona, id_especialidad, id_dia, id_turno, hora_inicio, hora_fin, id_sala_atencion):
         insertAgenda_medicaSQL = """
-        INSERT INTO agenda_medicas(id_persona,id_especialidad,id_dia,id_turno,hora_inicio, hora_fin, id_sala_atencion) VALUES(%s, %s,%s, %s,%s, %s,%s) RETURNING id_agenda_medica
+        INSERT INTO agenda_medicas(id_persona, id_especialidad, id_dia, id_turno, hora_inicio, hora_fin, id_sala_atencion) VALUES(%s, %s,%s, %s,%s,%s,%s) RETURNING id_agenda_medica
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(insertAgenda_medicaSQL, (id_persona,id_especialidad,id_dia,id_turno,hora_inicio, hora_fin, id_sala_atencion))
+            cur.execute(insertAgenda_medicaSQL, (id_persona, id_especialidad, id_dia, id_turno, hora_inicio, hora_fin, id_sala_atencion))
             agenda_medica_id = cur.fetchone()[0]
             con.commit()
             return agenda_medica_id
