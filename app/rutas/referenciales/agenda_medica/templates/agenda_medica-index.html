@@ -20,11 +20,9 @@ Agenda Médica
               <th>Nombre:</th>
               <th>Apellido:</th>
               <th>Especialidad:</th>
-              <th>Dias laborales:</th>
               <th>Turno:</th>
-              <th>Hora inicio</th>
-              <th>Hora fin</th>
-              <th>Sala de atención</th>
+              <th>Sala de atención:</th>
+              <th>Estado laboral del médico:</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -55,19 +53,15 @@ Agenda Médica
               <input type="hidden" id="id_especialidad">
               <label for="txtEspecialidad">Especialidad:</label>
               <input type="text" class="form-control" placeholder="Clik para selecionar la Especialidad" id="txtEspecialidad">
-              <input type="hidden" id="id_dia">
-              <label for="txtDia">Dias Laborales:</label>
-              <input type="text" class="form-control" placeholder="Clik para asignar un dia laboral" id="txtDia">
               <input type="hidden" id="id_turno">
               <label for="txtTurno">Turno:</label>
               <input type="text" class="form-control" placeholder="Clik para asignar el turno" id="txtTurno">
-              <label for="txtHoraInicio">Hora Inicio:</label>
-              <input type="time" class="form-control" placeholder="Ingrese la hora de inicio" id="txtHoraInicio">
-              <label for="txtHoraFin">Hora Fin:</label>
-              <input type="time" class="form-control" placeholder="Ingrese la hora de fin" id="txtHoraFin">
               <input type="hidden" id="id_sala_atencion">
               <label for="txtSala_atencion">Sala de atencion:</label>
               <input type="text" class="form-control" placeholder="Clik para asignar la sala de atencion" id="txtSala_atencion">
+              <input type="hidden" id="id_estado_laboral">
+              <label for="txtEstado_laboral">Estado laboral del médico:</label>
+              <input type="text" class="form-control" placeholder="Clik para seleccionar el estado laboral del médico" id="txtEstado_laboral">
             </div>
           </div>
 
@@ -129,30 +123,6 @@ Agenda Médica
       </div>
     </div>
 
-    <div class="modal" id="modalBuscarDia">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="modalDiaTitle">Seleccionar Dia laboral</h4>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-          </div>
-          <div class="modal-body">
-            <div class="table-responsive">
-              <table class="table table-striped table-bordered w-100" id="tblDia">
-                <thead>
-                  <tr>
-                    <th>Dia laboral</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="modal" id="modalBuscarTurno">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -201,6 +171,30 @@ Agenda Médica
       </div>
     </div>
 
+    <div class="modal" id="modalBuscarEstado_laboral">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="modalEstado_laboralTitle">Seleccionar Estado laboral</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered w-100" id="tblEstado_laboral">
+                <thead>
+                  <tr>
+                    <th>Estado laboral</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="row mt-4 d-none" id="rowAlerta">
         <div class="col col-md-12">
             <div class="alert alert-success">
@@ -224,11 +218,9 @@ Agenda Médica
         { data: 'nombre' },
         { data: 'apellido' },
         { data: 'especialidad' },
-        { data: 'dia' },
         { data: 'turno' },
-        { data: 'hora_inicio' },
-        { data: 'hora_fin' },
         { data: 'sala_atencion' },
+        { data: 'estado_laboral' },
         { data: function(row) {
             return `<button type="button" name="btn_editar" class="btn btn-success" data-id="${row.id_agenda_medica}">Editar</button>
                     <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_agenda_medica}">Eliminar</button>`
@@ -300,36 +292,6 @@ Agenda Médica
     });
   }
 
-  const initDatatabled= () => {
-    $('#tblDia').DataTable({
-      language: {
-        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
-      },
-      ajax:'/api/v1/dias',
-      columns: [
-        { data: 'descripcion' },
-        { data: function(row) {
-            return `<button type="button" name="btn_seleccionar_dia" class="btn btn-success" data-id="${row.id_dia}" data-dia="${row.descripcion}"<i class="fa fa-check"></i>Selecionar</button>`;
-          }
-        }
-      ]
-    });
-    $('#tblDia').on('click', 'button[name="btn_seleccionar_dia"]', function () {
-      const idDia = $(this).data('id');
-      const dia = $(this).data('dia');
-      $('#txtDia').val(dia);
-      $('#id_dia').val(idDia);
-      $('#modalBuscarDia').modal('hide');
-    });
-  }
-
-  const buscarDia = () => {
-    $('#txtDia').on('click', function () {
-      $('#modalDiaTitle').text("Seleccionar día");
-      $('#modalBuscarDia').modal();
-    });
-  }
-
   const initDatatablet= () => {
     $('#tblTurno').DataTable({
       language: {
@@ -390,17 +352,45 @@ Agenda Médica
     });
   }
 
+  const initDatatablees= () => {
+    $('#tblEstado_laboral').DataTable({
+      language: {
+        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+      },
+      ajax:'/api/v1/estado_laborales',
+      columns: [
+        { data: 'descripcion' },
+        { data: function(row) {
+            return `<button type="button" name="btn_seleccionar_estado_laboral" class="btn btn-success" data-id="${row.id_estado_laboral}" data-estado_laboral="${row.descripcion}"<i class="fa fa-check"></i>Selecionar</button>`;
+          }
+        }
+      ]
+    });
+    $('#tblEstado_laboral').on('click', 'button[name="btn_seleccionar_estado_laboral"]', function () {
+      const idEstado_laboral = $(this).data('id');
+      const estado_laboral = $(this).data('estado_laboral');
+      $('#txtEstado_laboral').val(estado_laboral);
+      $('#id_estado_laboral').val(idEstado_laboral);
+      $('#modalBuscarEstado_laboral').modal('hide');
+    });
+  }
+
+  const buscarEstado_laboral = () => {
+    $('#txtEstado_laboral').on('click', function () {
+      $('#modalEstado_laboralTitle').text("Seleccionar Estado_laboral");
+      $('#modalBuscarEstado_laboral').modal();
+    });
+  }
+
   const agregar = () => {
     $('#btnAgregar').on('click', function(){
       $('#modalTitle').text("Agregar una agenda médica");
       $('#txtIdAgenda_medica').val("");
       $('#txtPersona').val("");
       $('#txtEspecialidad').val("");
-      $('#txtDia').val("");
       $('#txtTurno').val("");
-      $('#txtHoraInicio').val("");
-      $('#txtHoraFin').val("");
       $('#txtSala_atencion').val("");
+      $('#txtEstado_laboral').val("");
       $('#modalFormulario').modal();
     });
   }
@@ -410,11 +400,9 @@ Agenda Médica
       const idAgenda_medica = $('#txtIdAgenda_medica').val();
       const id_persona = $('#id_persona').val();
       const id_especialidad = $('#id_especialidad').val();
-      const id_dia = $('#id_dia').val();
       const id_turno = $('#id_turno').val();
-      const nuevoHoraInicio = $('#txtHoraInicio').val();
-      const nuevoHoraFin = $('#txtHoraFin').val();
       const id_sala_atencion = $('#id_sala_atencion').val();
+      const id_estado_laboral = $('#id_estado_laboral').val();
       const tabla = $('#tbl').DataTable();
 
       if (idAgenda_medica) {
@@ -423,7 +411,7 @@ Agenda Médica
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({id_persona: id_persona, id_especialidad: id_especialidad, id_dia: id_dia, id_turno: id_turno, hora_inicio: nuevoHoraInicio, hora_fin: nuevoHoraFin, id_sala_atencion: id_sala_atencion})
+          }, body: JSON.stringify({id_persona: id_persona, id_especialidad: id_especialidad, id_turno: id_turno, id_sala_atencion: id_sala_atencion, id_estado_laboral: id_estado_laboral})
         })
         .then(resp => resp.json())
         .then(data => {
@@ -443,7 +431,7 @@ Agenda Médica
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({id_persona: id_persona, id_especialidad: id_especialidad, id_dia: id_dia, id_turno: id_turno, hora_inicio: nuevoHoraInicio, hora_fin: nuevoHoraFin, id_sala_atencion: id_sala_atencion})
+          }, body: JSON.stringify({id_persona: id_persona, id_especialidad: id_especialidad, id_turno: id_turno, id_sala_atencion: id_sala_atencion, id_estado_laboral: id_estado_laboral})
         })
         .then(resp => resp.json())
         .then(data => {
@@ -488,14 +476,12 @@ Agenda Médica
             $('#id_persona').val(data.data.id_persona);
             $('#txtEspecialidad').val(data.data.especialidad);
             $('#id_especialidad').val(data.data.id_especialidad);
-            $('#txtDia').val(data.data.dia);
-            $('#id_dia').val(data.data.id_dia);
             $('#txtTurno').val(data.data.turno);
             $('#id_turno').val(data.data.id_turno);
-            $('#txtHoraInicio').val(data.data.hora_inicio);
-            $('#txtHoraFin').val(data.data.hora_fin);
             $('#txtSala_atencion').val(data.data.sala_atencion);
             $('#id_sala_atencion').val(data.data.id_sala_atencion);
+            $('#txtEstado_laboral').val(data.data.estado_laboral);
+            $('#id_estado_laboral').val(data.data.id_estado_laboral);
             $('#modalFormulario').modal();
           });
         }
@@ -544,18 +530,18 @@ Agenda Médica
     eliminar();
     buscarPersona();
     buscarEspecialidad();
-    buscarDia();
     buscarTurno();
     buscarSala_atencion();
+    buscarEstado_laboral();
   }
 
   $(function() {
     initDatatable();
     initDatatablep();
     initDatatablee();
-    initDatatabled();
     initDatatablet();
     initDatatables();
+    initDatatablees();
     addEvents();
   }); 
 </script> 

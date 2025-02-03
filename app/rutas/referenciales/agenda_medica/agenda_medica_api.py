@@ -58,7 +58,7 @@ def addAgenda_medica():
     agendamedicadao = Agenda_medicaDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['id_persona','id_especialidad','id_dia','id_turno','hora_inicio', 'hora_fin','id_sala_atencion']
+    campos_requeridos = ['id_persona','id_especialidad','id_turno','id_sala_atencion','id_estado_laboral']
 
     # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
@@ -72,17 +72,15 @@ def addAgenda_medica():
         #print("hola")
         id_persona = data['id_persona']
         id_especialidad = data['id_especialidad']
-        id_dia = data['id_dia']
         id_turno = data['id_turno']
-        hora_inicio = data['hora_inicio']
-        hora_fin = data['hora_fin']
         id_sala_atencion = data['id_sala_atencion']
+        id_estado_laboral = data['id_estado_laboral']
 
-        agenda_medica_id = agendamedicadao.guardarAgenda_medica(id_persona,id_especialidad,id_dia,id_turno,hora_inicio, hora_fin,id_sala_atencion)
+        agenda_medica_id = agendamedicadao.guardarAgenda_medica(id_persona,id_especialidad,id_turno,id_sala_atencion, id_estado_laboral)
         if agenda_medica_id is not None:
             return jsonify({
                 'success': True,
-                'data': {'id_agenda_medica': agenda_medica_id, 'id_persona': id_persona, 'id_especialidad': id_especialidad, 'id_dia': id_dia, 'id_turno': id_turno, 'hora_inicio': hora_inicio, 'hora_fin': hora_fin,'id_sala_atencion': id_sala_atencion},
+                'data': {'id_agenda_medica': agenda_medica_id, 'id_persona': id_persona, 'id_especialidad': id_especialidad,'id_turno': id_turno, 'id_sala_atencion': id_sala_atencion, 'id_estado_laboral': id_estado_laboral},
                 'error': None
             }), 201
         else:
@@ -101,7 +99,7 @@ def updateAgenda_medica(agenda_medica_id):
     agendamedicadao = Agenda_medicaDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['id_persona','id_especialidad','id_dia','id_turno','hora_inicio', 'hora_fin','id_sala_atencion']
+    campos_requeridos = ['id_persona','id_especialidad','id_turno','id_sala_atencion','id_estado_laboral']
 
     # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
@@ -113,16 +111,14 @@ def updateAgenda_medica(agenda_medica_id):
 
         id_persona = data['id_persona']
         id_especialidad = data['id_especialidad']
-        id_dia = data['id_dia']
         id_turno = data['id_turno']
-        hora_inicio = data['hora_inicio']
-        hora_fin = data['hora_fin']
         id_sala_atencion = data['id_sala_atencion']
+        id_estado_laboral = data['id_estado_laboral']
     try:
-        if agendamedicadao.updateAgenda_medica(agenda_medica_id, id_persona, id_especialidad, id_dia, id_turno, hora_inicio, hora_fin, id_sala_atencion):
+        if agendamedicadao.updateAgenda_medica(agenda_medica_id, id_persona, id_especialidad, id_turno, id_sala_atencion, id_estado_laboral):
             return jsonify({
                 'success': True,
-                'data': {'id_agenda_medica': agenda_medica_id, 'id_persona': id_persona, 'id_especialidad': id_especialidad, 'id_dia': id_dia, 'id_turno': id_turno, 'hora_inicio': hora_inicio, 'hora_fin': hora_fin,'id_sala_atencion': id_sala_atencion},
+                'data': {'id_agenda_medica': agenda_medica_id, 'id_persona': id_persona, 'id_especialidad': id_especialidad, 'id_turno': id_turno, 'id_sala_atencion': id_sala_atencion, 'id_estado_laboral': id_estado_laboral},
                 'error': None
             }), 200
         else:

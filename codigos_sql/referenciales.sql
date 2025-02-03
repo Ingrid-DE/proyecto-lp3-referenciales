@@ -67,17 +67,15 @@ CREATE TABLE
 	);
 
 
-CREATE TABLE
-	medicos(
-		id_medico serial PRIMARY KEY,
-		id_persona INTEGER NOT NULL,
-		matricula VARCHAR(255),
-		id_estado_laboral INTEGER NOT NULL,
-		FOREIGN KEY(id_persona) REFERENCES personas(id_persona)
-    	ON DELETE RESTRICT ON UPDATE CASCADE,
-		FOREIGN KEY(id_estado_laboral) REFERENCES estado_laborales(id_estado_laboral)
-    	ON DELETE RESTRICT ON UPDATE CASCADE
-	);
+CREATE TABLE medicos(
+    id_medico serial PRIMARY KEY,
+    id_persona INTEGER NOT NULL,
+    matricula VARCHAR(255),
+    nombre VARCHAR(255),  -- Nombre heredado de personas
+    apellido VARCHAR(255),  -- Apellido heredado de personas
+    FOREIGN KEY(id_persona) REFERENCES personas(id_persona)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+);
 
 CREATE TABLE
  pacientes (
@@ -116,6 +114,7 @@ CREATE TABLE
    		id_dia INTEGER NOT NULL,
     	hora_inicio TIME NOT NULL,
     	hora_fin TIME NOT NULL,
+		id_estado_laboral INTEGER NOT NULL,
 		id_sala_atencion INTEGER NOT NULL,
 		FOREIGN KEY(id_persona) REFERENCES personas(id_persona)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -126,7 +125,9 @@ CREATE TABLE
 		FOREIGN KEY(id_sala_atencion) REFERENCES sala_atenciones(id_sala_atencion)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
 		FOREIGN KEY(id_turno) REFERENCES turnos(id_turno)
-		ON DELETE RESTRICT ON UPDATE CASCADE
+		ON DELETE RESTRICT ON UPDATE CASCADE,
+		FOREIGN KEY(id_estado_laboral) REFERENCES estado_laborales(id_estado_laboral)
+    	ON DELETE RESTRICT ON UPDATE CASCADE
 	);
 
 CREATE TABLE
