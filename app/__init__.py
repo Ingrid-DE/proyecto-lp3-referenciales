@@ -31,8 +31,15 @@ from app.rutas.referenciales.estado_laboral.estado_laboral_routes import estado_
 from app.rutas.referenciales.ficha.ficha_routes import fichamod
 from app.rutas.referenciales.agenda_medica.agenda_medica_routes import agendamedmod
 from app.rutas.referenciales.sala_atencion.sala_atencion_routes import salmod
+from app.rutas.referenciales.usuario.usuario_routes import usumod
+from app.rutas.referenciales.cita.cita_routes import citamod
 
 # registrar referenciales
+modulo0 = '/referenciales'
+app.register_blueprint(citamod, url_prefix=f'{modulo0}/cita')
+
+from app.rutas.referenciales.cita.cita_api import cita_api
+
 modulo0 = '/referenciales'
 app.register_blueprint(ciumod, url_prefix=f'{modulo0}/ciudad')
 
@@ -118,7 +125,15 @@ app.register_blueprint(salmod, url_prefix=f'{modulo0}/sala_atencion')
 
 from app.rutas.referenciales.sala_atencion.sala_atencion_api import salapi
 
+modulo0 = '/referenciales'
+app.register_blueprint(usumod, url_prefix=f'{modulo0}/usuaruio')
+
+from app.rutas.referenciales.usuario.usuario_api import usuarioapi
+
 # APIS v1
+version1 = '/api/v1'
+app.register_blueprint(cita_api, url_prefix=version1)
+
 version1 = '/api/v1'
 app.register_blueprint(ciuapi, url_prefix=version1)
 
@@ -154,3 +169,5 @@ app.register_blueprint(fichaapi, url_prefix=version1)
 app.register_blueprint(agenda_medica_api, url_prefix=version1)
 
 app.register_blueprint(salapi, url_prefix=version1)
+
+app.register_blueprint(usuarioapi, url_prefix=version1)

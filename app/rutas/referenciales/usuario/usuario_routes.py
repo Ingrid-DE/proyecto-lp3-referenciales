@@ -1,7 +1,7 @@
 from flask import Blueprint,render_template
 
-diamod = Blueprint('dia', __name__, template_folder='templates')
+usumod = Blueprint('usuario', __name__, template_folder='templates')
 
-@diamod.route('/dia-index')
-def diaIndex():
-    return render_template('dia-index.html')
+@usumod.route('/usuario-index')
+def usuarioIndex():
+    return render_template('usuario-index.html')

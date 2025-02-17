@@ -11,13 +11,13 @@ Usuarios
     <!-- tarjeta -->
     <div class="card">
       <div class="card-header">
-        <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
+        <button type="button" class="btn btn-success" id="btnAgregar">Agregar</button>
       </div>
       <div class="card-body">
         <table class="table table-striped" id="tbl">
           <thead>
             <tr>
-              <th>Nickname</th>
+              <th>Usuario</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -44,7 +44,7 @@ Usuarios
       <div class="modal-body">
         <div class="form-group">
           <input type="hidden" id="id_usuario">
-          <label for="txtNickname">Nickname:</label>
+          <label for="txtNickname">Usuario:</label>
           <input type="text" class="form-control" placeholder="Ingrese el nickname" id="txtNickname">
 
           <label for="txtClave">Clave:</label>
@@ -60,7 +60,7 @@ Usuarios
 
       <!-- Modal footer -->
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
+        <button type="button" class="btn btn-success" id="btnGuardar">Guardar</button>
         <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
       </div>
 
@@ -92,7 +92,7 @@ Usuarios
         { data: 'nickname' },
         { data: 'estado' },
         { data: function(row) {
-            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id_usuario}">Editar</button>
+            return `<button type="button" name="btn_editar" class="btn btn-success" data-id="${row.id_usuario}">Editar</button>
                     <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_usuario}">Eliminar</button>`
           }
         }
@@ -118,7 +118,7 @@ Usuarios
       const id_usuario = $('#id_usuario').val();
       const nickname = $('#txtNickname').val();
       const clave = $('#txtClave').val();
-      const estado = $('#txtEstado').val();
+      const estado = $('#txtEstado').val() === 'activo' ? true : false;
       const tabla = $('#tbl').DataTable();
 
       if(id_usuario) {
@@ -143,6 +143,7 @@ Usuarios
         });
       } else {
         // insert
+        alert(estado);
         fetch(`/api/v1/usuarios`, {
           method: 'POST',
           headers: {

@@ -71,8 +71,6 @@ CREATE TABLE medicos(
     id_medico serial PRIMARY KEY,
     id_persona INTEGER NOT NULL,
     matricula VARCHAR(255),
-    nombre VARCHAR(255),  -- Nombre heredado de personas
-    apellido VARCHAR(255),  -- Apellido heredado de personas
     FOREIGN KEY(id_persona) REFERENCES personas(id_persona)
     ON DELETE RESTRICT ON UPDATE CASCADE
 );
@@ -108,15 +106,13 @@ CREATE TABLE
 CREATE TABLE
 	agenda_medicas(
 		id_agenda_medica serial PRIMARY KEY,
-		id_persona INTEGER NOT NULL,
+		id_medico INTEGER NOT NULL,
 		id_especialidad INTEGER NOT NULL,
 		id_turno INTEGER NOT NULL,
    		id_dia INTEGER NOT NULL,
-    	hora_inicio TIME NOT NULL,
-    	hora_fin TIME NOT NULL,
 		id_estado_laboral INTEGER NOT NULL,
 		id_sala_atencion INTEGER NOT NULL,
-		FOREIGN KEY(id_persona) REFERENCES personas(id_persona)
+		FOREIGN KEY(id_medico) REFERENCES personas(id_medico)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
 		FOREIGN KEY(id_especialidad) REFERENCES especialidades(id_especialidad)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -143,7 +139,7 @@ CREATE TABLE
 		id_paciente INTEGER NOT NULL,
 		fecha DATE NOT NULL,
 	    hora TIME NOT NULL,
-		observación TEXT,
+		obcervacion TEXT,
 		id_estado_cita INTEGER NOT NULL,
 		FOREIGN KEY(id_agenda_medica) REFERENCES agenda_medicas(id_agenda_medica)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -151,13 +147,10 @@ CREATE TABLE
 		ON DELETE RESTRICT ON UPDATE CASCADE,
 		FOREIGN KEY(id_estado_cita) REFERENCES estado_citas(id_estado_cita)
 		ON DELETE RESTRICT ON UPDATE CASCADE
-		
-	);
+    );
 
-	CREATE TABLE
-	Aviso_recordatorio(
-		id_aviso_recordatorio serial PRIMARY KEY,
-		id_cita INTEGER NOT NULL,
-		FOREIGN KEY(id_cita) REFERENCES citas(id_cita)
-		ON DELETE RESTRICT ON UPDATE CASCADE
+CREATE TABLE
+    notificaciones(
+        id_notificacion serial PRIMARY KEY,
+        id_cita INTEGER NOT NULL,	
 	);

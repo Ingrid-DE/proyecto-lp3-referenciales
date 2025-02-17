@@ -9,7 +9,7 @@ class LoginDao:
         buscar_usuario_sql = """
         SELECT u.id_usuario, u.nickname,u.clave, u.estado
         FROM usuarios u
-        where u.nickname=%s
+        where u.nickname=%s and u.estado='true'
         """
         # objeto conexion
         conexion = Conexion()

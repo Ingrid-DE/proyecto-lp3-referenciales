@@ -30,7 +30,7 @@ def login():
             else:
                 flash('Contraseña incorrecta.', 'warning')
         else:
-            flash('Error de login, no existe este usuario.', 'warning')
+            flash('Error de login, usuario no valido.', 'warning')
         return redirect(url_for('login.login'))  
     elif request.method == 'GET':
         return render_template('login.html')

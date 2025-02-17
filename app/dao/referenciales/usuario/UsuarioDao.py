@@ -56,6 +56,7 @@ class UsuarioDao:
             con.close()
 
     def guardarUsuario(self, nickname, clave, estado):
+        print(nickname, clave, estado)
         insertUsuarioSQL = """
         INSERT INTO usuarios(nickname, clave, estado) 
         VALUES(%s, %s, %s) RETURNING id_usuario

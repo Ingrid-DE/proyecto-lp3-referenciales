@@ -57,7 +57,7 @@ def addUsuario():
     usuariodao = UsuarioDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['nickname', 'clave', 'estado']
+    campos_requeridos = ['nickname', 'clave']
 
     # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
@@ -93,7 +93,7 @@ def updateUsuario(usuario_id):
     usuariodao = UsuarioDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['nickname', 'clave', 'estado']
+    campos_requeridos = ['nickname', 'clave']
 
     # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:

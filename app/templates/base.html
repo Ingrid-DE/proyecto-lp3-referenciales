@@ -72,12 +72,13 @@
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="{{ url_for('persona.personaIndex') }}">Datos personales</a>
+                        <a class="collapse-item" href="{{ url_for('usuario.usuarioIndex') }}">Usuarios</a>
                         <a class="collapse-item" href="{{ url_for('paciente.pacienteIndex') }}">Datos del paciente</a>
                         <a class="collapse-item" href="{{ url_for('medico.medicoIndex') }}">Datos del médico</a>
                         <a class="collapse-item" href="{{ url_for('turno.turnoIndex') }}">Turnos</a>
                         <a class="collapse-item" href="{{ url_for('dia.diaIndex') }}">Días laborales</a>
                         <a class="collapse-item" href="{{ url_for('hora.horaIndex') }}">Horario de atención</a>
-                        <a class="collapse-item" href="{{ url_for('estado_cita.estado_citaIndex') }}">estado cita</a>
+                        <a class="collapse-item" href="{{ url_for('cita.citaIndex') }}">Cita Medica</a>
                         <a class="collapse-item" href="{{ url_for('especialidad.especialidadIndex') }}">especialidad</a>
                         <a class="collapse-item"
                             href="{{ url_for('sala_atencion.sala_atencionIndex') }}">sala_atencion</a>
@@ -94,6 +95,7 @@
                     aria-expanded="true" aria-controls="collapseUtilities">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span class="text-wrap">Gestionar Agendamiento</span>
+
                 </a>
                 <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
