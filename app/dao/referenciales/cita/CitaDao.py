@@ -7,10 +7,10 @@ class CitaDao:
     def getCitas(self):
         citaSQL = """
        SELECT 
-            c.id_cita,pm.nombre, pm.apellido, e.descripcion, p.nombre, p.apellido,  h.dis_horas, c.observacion, es.descripcion
-                FROM  citas c, agenda_medicas a, personas pm, medicos m, especialidades e, personas p, pacientes pa, disponibilidad_horaria h, estado_citas es
+            c.id_cita, pm.nombre, pm.apellido, e.descripcion, t.descripcion, p.nombre, p.apellido, p.cedula, h.dis_horas, c.observacion, es.descripcion
+                FROM  citas c, agenda_medicas a, personas pm, medicos m, especialidades e, turnos t, personas p, pacientes pa, disponibilidad_horaria h, estado_citas es
                 where c.id_agenda_medica=a.id_agenda_medica and a.id_medico=m.id_medico and m.id_persona=pm.id_persona 
-				and a.id_especialidad=e.id_especialidad  and c.id_paciente=pa.id_paciente and pa.id_persona=p.id_persona 
+				and a.id_especialidad=e.id_especialidad and a.id_turno=t.id_turno and c.id_paciente=pa.id_paciente and pa.id_persona=p.id_persona 
 				and c.id_estado_cita=es.id_estado_cita and c.id_hora=h.id_disponibilidad_horaria
             """
         conexion = Conexion()
@@ -20,7 +20,7 @@ class CitaDao:
             cur.execute(citaSQL)
             citas = cur.fetchall()
             return [{
-                'id_cita':  cita[0], 'nombrem':  cita[1], 'apellidom': cita[2], 'especialidad':  cita[3], 'nombrep':  cita[4],  'apellidop':  cita[5], 'hora': cita[6], 'observacion': cita[7], 'estado': cita[8]} for cita in citas]
+                'id_cita':  cita[0], 'nombrem':  cita[1], 'apellidom': cita[2], 'especialidad':  cita[3], 'turno':  cita[4], 'nombrep':  cita[5],  'apellidop':  cita[6],'cedula':  cita[7], 'hora': cita[8], 'observacion': cita[9], 'estado': cita[10]} for cita in citas]
         
         except Exception as e:
             app.logger.error(f"Error al obtener todas las citas: {str(e)}")
@@ -32,10 +32,10 @@ class CitaDao:
     def getCitaById(self, id_cita):
         citaSQL = """
         SELECT 
-              c.id_cita, pm.nombre, pm.apellido,e.descripcion, p.nombre, p.apellido, h.dis_horas, c.observacion, es.descripcion, c.id_agenda_medica, pm.id_persona, m.id_medico, a.id_especialidad, p.id_persona, pa.id_paciente, h.id_disponibilidad_horaria, c.id_estado_cita
-                FROM  citas c, agenda_medicas a, personas pm, medicos m, especialidades e, personas p, pacientes pa, disponibilidad_horaria h, estado_citas es
+              c.id_cita, pm.nombre, pm.apellido,e.descripcion,  t.descripcion, p.nombre, p.apellido, p.cedula, h.dis_horas, c.observacion, es.descripcion, c.id_agenda_medica, pm.id_persona, m.id_medico, a.id_especialidad, a.id_turno, p.id_persona, pa.id_paciente, h.id_disponibilidad_horaria, c.id_estado_cita
+                FROM  citas c, agenda_medicas a, personas pm, medicos m, especialidades e, turnos t, personas p, pacientes pa, disponibilidad_horaria h, estado_citas es
                 where c.id_agenda_medica=a.id_agenda_medica and a.id_medico=m.id_medico and m.id_persona=pm.id_persona 
-				and a.id_especialidad=e.id_especialidad  and c.id_paciente=pa.id_paciente and pa.id_persona=p.id_persona 
+				and a.id_especialidad=e.id_especialidad and a.id_turno=t.id_turno and c.id_paciente=pa.id_paciente and pa.id_persona=p.id_persona 
 				and c.id_estado_cita=es.id_estado_cita and c.id_hora=h.id_disponibilidad_horaria and c.id_cita=%s
         """
         conexion = Conexion()
@@ -50,19 +50,22 @@ class CitaDao:
                     "nombrem": citaEncontrada[1],
                     "apellidom": citaEncontrada[2],
                     "especialidad": citaEncontrada[3],
-                    "nombrep": citaEncontrada[4],
-                    "apellidop": citaEncontrada[5],
-                    "hora":citaEncontrada[6],
-                    "observacion": citaEncontrada[7],
-                    "estado": citaEncontrada[8],
-                    "id_agenda_medica": citaEncontrada[9],
-                    "id_persona": citaEncontrada[10],
-                    "id_medico": citaEncontrada[11],
-                    "id_especialidad": citaEncontrada[12],
-                    "id_persona": citaEncontrada[13],
-                    "id_paciente": citaEncontrada[14],
-                    "id_disponibilidad_horaria": citaEncontrada[15],
-                    "id_estado_cita": citaEncontrada[16]
+                    "turno": citaEncontrada[4],
+                    "nombrep": citaEncontrada[5],
+                    "apellidop": citaEncontrada[6],
+                    "cedula": citaEncontrada[7],
+                    "hora":citaEncontrada[8],
+                    "observacion": citaEncontrada[9],
+                    "estado": citaEncontrada[10],
+                    "id_agenda_medica": citaEncontrada[11],
+                    "id_persona": citaEncontrada[12],
+                    "id_medico": citaEncontrada[13],
+                    "id_especialidad": citaEncontrada[14],
+                    "id_turno": citaEncontrada[15],
+                    "id_persona": citaEncontrada[16],
+                    "id_paciente": citaEncontrada[17],
+                    "id_disponibilidad_horaria": citaEncontrada[18],
+                    "id_estado_cita": citaEncontrada[19]
                 }
             else:
                 return None
