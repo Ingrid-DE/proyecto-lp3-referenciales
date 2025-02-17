@@ -17,10 +17,10 @@ Citas
         <table class="table table-striped" id="tbl">
           <thead>
             <tr>
+              <th>Nombre del medico :</th>
+              <th>Apellido </th>
               <th>Especialidad:</th>
-              <th>Nombre:</th>
-              <th>Apellido del medico</th>
-              <th>Nombre:</th>
+              <th>Nombre del paciente:</th>
               <th>Apellido del paciente:</th>
               <th>Hora:</th>
               <th>Observacion:</th>
@@ -192,11 +192,14 @@ Citas
       },
       ajax:'/api/v1/citas',
       columns: [
-        { data: 'nombrem'+' - '+'apellidom'+' - '+'especialidad' },
-        { data: 'nombrep'+' - '+'apellidp' },
+        { data: 'nombrem'  },
+        { data: 'apellidom' },
+        { data: 'especialidad' },
+        { data: 'nombrep' },
+        { data: 'apellidop' },
         { data: 'hora' },
         { data: 'Observacion' },
-        { data: 'estado_cita' },
+        { data: 'estado' },
         { data: function(row) {
             return `<button type="button" name="btn_editar" class="btn btn-success" data-id="${row.id_cita}">Editar</button>
                     <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_cita}">Eliminar</button>`;
