@@ -112,7 +112,7 @@ CREATE TABLE
    		id_dia INTEGER NOT NULL,
 		id_estado_laboral INTEGER NOT NULL,
 		id_sala_atencion INTEGER NOT NULL,
-		FOREIGN KEY(id_medico) REFERENCES personas(id_medico)
+		FOREIGN KEY(id_medico) REFERENCES medicos(id_medico)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
 		FOREIGN KEY(id_especialidad) REFERENCES especialidades(id_especialidad)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -124,6 +124,16 @@ CREATE TABLE
 		ON DELETE RESTRICT ON UPDATE CASCADE,
 		FOREIGN KEY(id_estado_laboral) REFERENCES estado_laborales(id_estado_laboral)
     	ON DELETE RESTRICT ON UPDATE CASCADE
+	);
+
+CREATE TABLE
+	disponibilidad_horaria(
+		id_disponibilidad_horaria serial PRIMARY KEY,
+		dis_horas varchar(60) UNIQUE,
+		dis_estado varchar(60) UNIQUE,
+		id_agenda_medica INTEGER NOT NULL,
+		FOREIGN KEY(id_agenda_medica) REFERENCES agenda_medicas(id_agenda_medica)
+		ON DELETE RESTRICT ON UPDATE CASCADE
 	);
 
 CREATE TABLE
@@ -152,5 +162,5 @@ CREATE TABLE
 CREATE TABLE
     notificaciones(
         id_notificacion serial PRIMARY KEY,
-        id_cita INTEGER NOT NULL,	
+        id_cita INTEGER NOT NULL
 	);

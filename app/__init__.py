@@ -24,7 +24,6 @@ from app.rutas.referenciales.estado_civil.estado_civil_routes import estmod
 from app.rutas.referenciales.enfermedad.enfermedad_routes import enfmod
 from app.rutas.referenciales.genero.genero_routes import genmod
 from app.rutas.referenciales.dia.dia_routes import diamod
-from app.rutas.referenciales.hora.hora_routes import hormod
 from app.rutas.referenciales.especialidad.especialidad_routes import espmod
 from app.rutas.referenciales.estado_cita.estado_cita_routes import estdmod
 from app.rutas.referenciales.estado_laboral.estado_laboral_routes import estado_laboralmod
@@ -32,14 +31,8 @@ from app.rutas.referenciales.ficha.ficha_routes import fichamod
 from app.rutas.referenciales.agenda_medica.agenda_medica_routes import agendamedmod
 from app.rutas.referenciales.sala_atencion.sala_atencion_routes import salmod
 from app.rutas.referenciales.usuario.usuario_routes import usumod
-from app.rutas.referenciales.cita.cita_routes import citamod
 
 # registrar referenciales
-modulo0 = '/referenciales'
-app.register_blueprint(citamod, url_prefix=f'{modulo0}/cita')
-
-from app.rutas.referenciales.cita.cita_api import cita_api
-
 modulo0 = '/referenciales'
 app.register_blueprint(ciumod, url_prefix=f'{modulo0}/ciudad')
 
@@ -96,11 +89,6 @@ app.register_blueprint(diamod, url_prefix=f'{modulo0}/dia')
 from app.rutas.referenciales.dia.dia_api import diaapi
 
 modulo0 = '/referenciales'
-app.register_blueprint(hormod, url_prefix=f'{modulo0}/hora')
-
-from app.rutas.referenciales.hora.hora_api import horapi
-
-modulo0 = '/referenciales'
 app.register_blueprint(espmod, url_prefix=f'{modulo0}/especialidad')
 
 from app.rutas.referenciales.especialidad.especialidad_api import espapi
@@ -132,9 +120,6 @@ from app.rutas.referenciales.usuario.usuario_api import usuarioapi
 
 # APIS v1
 version1 = '/api/v1'
-app.register_blueprint(cita_api, url_prefix=version1)
-
-version1 = '/api/v1'
 app.register_blueprint(ciuapi, url_prefix=version1)
 
 version1 = '/api/v1'
@@ -157,8 +142,6 @@ app.register_blueprint(enfapi, url_prefix=version1)
 app.register_blueprint(genapi, url_prefix=version1)
 
 app.register_blueprint(diaapi, url_prefix=version1)
-
-app.register_blueprint(horapi, url_prefix=version1)
 
 app.register_blueprint(espapi, url_prefix=version1)
 

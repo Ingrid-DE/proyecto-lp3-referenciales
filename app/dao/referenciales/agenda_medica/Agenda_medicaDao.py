@@ -1,3 +1,4 @@
+
 # Data access object - DAO
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
@@ -66,9 +67,9 @@ class Agenda_medicaDao:
             cur.close()
             con.close()
 
-    def guardarAgenda_medica(self, id_medico, id_especialidad, id_dia, id_turno, id_sala_atencion, id_estado_laboral,):
+    def guardarAgenda_medica(self, id_medico, id_especialidad, id_dia, id_turno, id_sala_atencion, id_estado_laboral, ):
         insertAgenda_medicaSQL = """
-        INSERT INTO agenda_medicas(id_medico, id_especialidad, id_dia, id_turno, id_sala_atencion, id_estado_laboral) VALUES(%s, %s, %s, %s,%s,%s) RETURNING id_agenda_medica
+        INSERT INTO agenda_medicas(id_medico, id_especialidad, id_dia, id_turno, id_sala_atencion, id_estado_laboral) VALUES(%s, %s, %s, %s, %s, %s) RETURNING id_agenda_medica
         """
         conexion = Conexion()
         con = conexion.getConexion()
