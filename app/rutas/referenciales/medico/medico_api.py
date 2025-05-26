@@ -50,16 +50,15 @@ def getMedico(medico_id):
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-#Agrega un nuevo medico
+# Agrega un nuevo medico
 @medicoapi.route('/medicos', methods=['POST'])
 def addMedico():
     data = request.get_json()
     medicodao = MedicoDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['id_persona','matricula']
+    campos_requeridos = ['id_persona', 'matricula']
 
-    # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
         if campo not in data or data[campo] is None or len(data[campo].strip()) == 0:
             return jsonify({
@@ -68,15 +67,21 @@ def addMedico():
             }), 400
 
     try:
-        #print("hola")
         id_persona = data['id_persona']
-        matricula = data['matricula'].upper()
+        matricula = data['matricula'].strip().upper()
+
+        # Validación de longitud exacta
+        if len(matricula) != 8:
+            return jsonify({
+                'success': False,
+                'error': 'La matrícula debe tener exactamente 8 caracteres.'
+            }), 400
 
         medico_id = medicodao.guardarMedico(id_persona, matricula)
         if medico_id is not None:
             return jsonify({
                 'success': True,
-                'data': {'id_medico': medico_id,'id_persona': id_persona, 'matricula': matricula},
+                'data': {'id_medico': medico_id, 'id_persona': id_persona, 'matricula': matricula},
                 'error': None
             }), 201
         else:
@@ -92,11 +97,9 @@ def addMedico():
 def updateMedico(medico_id):
     data = request.get_json()
     medicodao = MedicoDao()
-    #print(medico_id)
-    # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['id_persona','matricula' ]
 
-    # Verificar si faltan campos o son vacíos
+    campos_requeridos = ['id_persona', 'matricula']
+
     for campo in campos_requeridos:
         if campo not in data or data[campo] is None or len(data[campo].strip()) == 0:
             return jsonify({
@@ -106,7 +109,14 @@ def updateMedico(medico_id):
 
     try:
         id_persona = data['id_persona']
-        matricula = data['matricula'].upper()
+        matricula = data['matricula'].strip().upper()
+
+        # Validación de longitud exacta
+        if len(matricula) != 8:
+            return jsonify({
+                'success': False,
+                'error': 'La matrícula debe tener exactamente 8 caracteres.'
+            }), 400
 
         if medicodao.updateMedico(medico_id, id_persona, matricula):
             return jsonify({
