@@ -148,4 +148,4 @@ def deleteUsuario(usuario_id):
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
-        }), 500
+        }), 500 

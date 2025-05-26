@@ -29,12 +29,11 @@ CREATE TABLE
 	);
 
 CREATE TABLE usuarios(
-    id_usuario INTEGER PRIMARY KEY,
+    id_usuario SERIAL PRIMARY KEY,
     nickname TEXT NOT NULL,
     clave TEXT NOT NULL,
     estado BOOLEAN NOT NULL
 );
-
 
 CREATE TABLE 
 	personas(
@@ -79,8 +78,9 @@ CREATE TABLE
  pacientes (
 		id_paciente serial PRIMARY KEY,
 		id_persona INTEGER NOT NULL,
-    	fecha_nacimiento DATE NOT NULL,   		peso DECIMAL(5, 2) NOT NULL CHECK (peso >= 0),  -- Asegura que el peso no sea negativo
-    	altura DECIMAL(5, 2) NOT NULL CHECK (altura >= 0),  -- Asegura que la altura no sea negativa
+    	fecha_nacimiento DATE NOT NULL,   		
+		peso DECIMAL NOT NULL CHECK (peso >= 0),  -- Asegura que el peso no sea negativo
+    	altura DECIMAL  NOT NULL CHECK (altura >= 0),  -- Asegura que la altura no sea negativa
 		FOREIGN KEY(id_persona) REFERENCES personas(id_persona)
     	ON DELETE RESTRICT ON UPDATE CASCADE
 	);

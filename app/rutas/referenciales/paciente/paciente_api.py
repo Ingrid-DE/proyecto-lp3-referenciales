@@ -71,7 +71,7 @@ def addPaciente():
     try:
         #print("hola")
         id_persona = data['id_persona']
-        fecha_nacimiento = data['fecha_nacimiento']  # Formato esperado: YYYY-MM-DD
+        fecha_nacimiento = data['fecha_nacimiento']
         peso = data['peso']
         altura = data['altura']
 
@@ -114,7 +114,7 @@ def updatePaciente(paciente_id):
 
     try:
         id_persona = data['id_persona']
-        fecha_nacimiento = data['fecha_nacimiento']  # Formato esperado: YYYY-MM-DD
+        fecha_nacimiento = data['fecha_nacimiento']
         peso = data['peso']
         altura = data['altura']
 

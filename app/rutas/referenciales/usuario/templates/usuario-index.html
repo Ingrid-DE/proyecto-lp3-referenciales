@@ -196,7 +196,7 @@ Usuarios
           .then(data => {
             $('#txtNickname').val(data.data.nickname);
             $('#txtClave').val(data.data.clave);
-            $('#txtEstado').val(data.data.estado);
+            $('#txtEstado').val(data.data.estado ? 'activo' : 'inactivo');
             $('#modalFormulario').modal();
           });
         }

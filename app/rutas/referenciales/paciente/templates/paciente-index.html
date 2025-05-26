@@ -120,14 +120,8 @@ Pacientes
         { data: 'cedula' },
         { data: 'telefono_emergencia' },
         { data: 'fecha_nacimiento' },
-        { data: 'peso', render: function(data, type, row) {
-          return type === 'display' ? data.toString() : data;
-        }
-      },
-      { data: 'altura', render: function(data, type, row) {
-          return type === 'display' ? data.toString() : data;
-        }
-      },
+        { data: 'peso' },
+        { data: 'altura'},
         { data: function(row) {
             return `<button type="button" name="btn_editar" class="btn btn-success" data-id="${row.id_paciente}">Editar</button>
                     <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_paciente}">Eliminar</button>`;
@@ -268,7 +262,9 @@ Pacientes
             $('#txtIdPaciente').val(data.data.id_paciente);
             $('#txtPersona').val(data.data.nombre+" "+data.data.apellido+" "+data.data.cedula+" "+data.data.telefono_emergencia);
             $('#id_persona').val(data.data.id_persona);
-            $('#txtFecha_nacimiento').val(data.data.fecha_nacimiento);
+            const fechaNacimiento = new Date(data.data.fecha_nacimiento);
+            const fechaFormateada = fechaNacimiento.toISOString().split('T')[0];
+            $('#txtFecha_nacimiento').val(fechaFormateada);
             $('#txtPeso').val(data.data.peso);
             $('#txtAltura').val(data.data.altura);
             $('#modalFormulario').modal();

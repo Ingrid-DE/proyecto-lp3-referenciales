@@ -34,7 +34,7 @@ class PacienteDao:
                         ,'apellido': paciente[2]
                         ,'cedula': paciente[3]
                         ,'telefono_emergencia': paciente[4]
-                        ,'fecha_nacimiento': paciente[5].strftime('%d/%m/%Y')
+                        ,'fecha_nacimiento': paciente[5].strftime('%Y/%m/%d')
                         ,'peso': paciente[6]
                         ,'altura': paciente[7]
                     } 
@@ -69,7 +69,7 @@ class PacienteDao:
                     "apellido": pacienteEncontrado[2],
                     "cedula": pacienteEncontrado[3],
                     "telefono_emergencia": pacienteEncontrado[4],
-                    "fecha_nacimiento": pacienteEncontrado[5],
+                    "fecha_nacimiento": pacienteEncontrado[5].strftime('%Y/%m/%d'),
                     "peso": pacienteEncontrado[6],
                     "altura": pacienteEncontrado[7],
                     "id_persona": pacienteEncontrado[8]
