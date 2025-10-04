@@ -21,6 +21,18 @@ def convertir_a_dict(row):
         'estado_laboral': row[11]
     }
 
+# Función auxiliar para convertir disponibilidad por ID (incluye agenda_medica concatenada)
+def convertir_disponibilidad_detalle(row):
+    return {
+        'id_disponibilidad_horaria': row[0],
+        'id_agenda_medica': row[1],
+        'fecha': str(row[2]) if row[2] else None,
+        'hora_inicio': str(row[3]) if row[3] else None,
+        'hora_fin': str(row[4]) if row[4] else None,
+        'estado': row[5],
+        'agenda_medica': row[6]  # Campo concatenado para el formulario
+    }
+
 # Función auxiliar para convertir disponibilidad simple
 def convertir_disponibilidad_simple(row):
     return {
@@ -55,14 +67,14 @@ def getDisponibilidades():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Trae una disponibilidad por ID
+# Trae una disponibilidad por ID (con info de agenda para edición)
 @disponibilidad_horaria_api.route('/disponibilidades/<int:disponibilidad_id>', methods=['GET'])
 def getDisponibilidad(disponibilidad_id):
     disponibilidaddao = Disponibilidad_horariaDao()
     try:
         disponibilidad = disponibilidaddao.getDisponibilidadById(disponibilidad_id)
         if disponibilidad:
-            disponibilidad_dict = convertir_disponibilidad_simple(disponibilidad)
+            disponibilidad_dict = convertir_disponibilidad_detalle(disponibilidad)
             return jsonify({
                 'success': True,
                 'data': disponibilidad_dict,
@@ -114,11 +126,21 @@ def addDisponibilidad():
     disponibilidaddao = Disponibilidad_horariaDao()
     data = request.get_json()
 
+    # Validar campos requeridos
+    campos_requeridos = ['id_agenda_medica', 'fecha', 'hora_inicio', 'hora_fin']
+    for campo in campos_requeridos:
+        if campo not in data or data[campo] is None or len(str(data[campo]).strip()) == 0:
+            return jsonify({
+                'success': False,
+                'data': None,
+                'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
+            }), 400
+
     try:
         nueva_disponibilidad = disponibilidaddao.addDisponibilidad(data)
 
-        # Convertir fechas y horas a string si existen
         if nueva_disponibilidad:
+            # Convertir fechas y horas a string si existen
             if 'fecha' in nueva_disponibilidad and isinstance(nueva_disponibilidad['fecha'], date):
                 nueva_disponibilidad['fecha'] = str(nueva_disponibilidad['fecha'])
             if 'hora_inicio' in nueva_disponibilidad and isinstance(nueva_disponibilidad['hora_inicio'], time):
@@ -126,11 +148,17 @@ def addDisponibilidad():
             if 'hora_fin' in nueva_disponibilidad and isinstance(nueva_disponibilidad['hora_fin'], time):
                 nueva_disponibilidad['hora_fin'] = str(nueva_disponibilidad['hora_fin'])
 
-        return jsonify({
-            'success': True,
-            'data': nueva_disponibilidad,
-            'error': None
-        }), 201
+            return jsonify({
+                'success': True,
+                'data': nueva_disponibilidad,
+                'error': None
+            }), 201
+        else:
+            return jsonify({
+                'success': False,
+                'data': None,
+                'error': 'No se pudo guardar la disponibilidad. Consulte con el administrador.'
+            }), 500
     except Exception as e:
         app.logger.error(f"Error en endpoint POST /disponibilidades: {str(e)}")
         import traceback
@@ -141,15 +169,34 @@ def addDisponibilidad():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# 🔁 ACTUALIZAR una disponibilidad horaria
+# Actualizar una disponibilidad horaria
 @disponibilidad_horaria_api.route('/disponibilidades/<int:disponibilidad_id>', methods=['PUT'])
 def updateDisponibilidad(disponibilidad_id):
     disponibilidaddao = Disponibilidad_horariaDao()
     data = request.get_json()
 
+    # Validar campos requeridos
+    campos_requeridos = ['id_agenda_medica', 'fecha', 'hora_inicio', 'hora_fin']
+    for campo in campos_requeridos:
+        if campo not in data or data[campo] is None or len(str(data[campo]).strip()) == 0:
+            return jsonify({
+                'success': False,
+                'data': None,
+                'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
+            }), 400
+
     try:
         disponibilidad_actualizada = disponibilidaddao.updateDisponibilidad(disponibilidad_id, data)
+        
         if disponibilidad_actualizada:
+            # Convertir fechas y horas a string si existen
+            if 'fecha' in disponibilidad_actualizada and isinstance(disponibilidad_actualizada['fecha'], date):
+                disponibilidad_actualizada['fecha'] = str(disponibilidad_actualizada['fecha'])
+            if 'hora_inicio' in disponibilidad_actualizada and isinstance(disponibilidad_actualizada['hora_inicio'], time):
+                disponibilidad_actualizada['hora_inicio'] = str(disponibilidad_actualizada['hora_inicio'])
+            if 'hora_fin' in disponibilidad_actualizada and isinstance(disponibilidad_actualizada['hora_fin'], time):
+                disponibilidad_actualizada['hora_fin'] = str(disponibilidad_actualizada['hora_fin'])
+
             return jsonify({
                 'success': True,
                 'data': disponibilidad_actualizada,
@@ -171,13 +218,14 @@ def updateDisponibilidad(disponibilidad_id):
             'error': 'Error interno al actualizar la disponibilidad.'
         }), 500
 
-# ❌ ELIMINAR una disponibilidad horaria
+# Eliminar una disponibilidad horaria
 @disponibilidad_horaria_api.route('/disponibilidades/<int:disponibilidad_id>', methods=['DELETE'])
 def deleteDisponibilidad(disponibilidad_id):
     disponibilidaddao = Disponibilidad_horariaDao()
 
     try:
         eliminado = disponibilidaddao.deleteDisponibilidad(disponibilidad_id)
+        
         if eliminado:
             return jsonify({
                 'success': True,
