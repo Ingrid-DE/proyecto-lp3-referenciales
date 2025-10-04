@@ -31,7 +31,7 @@ from app.rutas.referenciales.ficha.ficha_routes import fichamod
 from app.rutas.referenciales.agenda_medica.agenda_medica_routes import agendamedmod
 from app.rutas.referenciales.sala_atencion.sala_atencion_routes import salmod
 from app.rutas.referenciales.usuario.usuario_routes import usumod
-
+from app.rutas.referenciales.disponibilidad_horaria.disponibilidad_horaria_routes import disponibilidad_horariamod
 # registrar referenciales
 modulo0 = '/referenciales'
 app.register_blueprint(ciumod, url_prefix=f'{modulo0}/ciudad')
@@ -118,11 +118,15 @@ app.register_blueprint(usumod, url_prefix=f'{modulo0}/usuaruio')
 
 from app.rutas.referenciales.usuario.usuario_api import usuarioapi
 
+modulo0 = '/referenciales'
+app.register_blueprint(disponibilidad_horariamod, url_prefix=f'{modulo0}/disponibilidad_horaria')
+
+from app.rutas.referenciales.disponibilidad_horaria.disponinilidad_horaria_api import disponibilidad_horaria_api
+
 # APIS v1
 version1 = '/api/v1'
 app.register_blueprint(ciuapi, url_prefix=version1)
-
-version1 = '/api/v1'
+    
 app.register_blueprint(estado_laboralapi, url_prefix=version1)
 
 app.register_blueprint(personaapi, url_prefix=version1)
@@ -154,3 +158,5 @@ app.register_blueprint(agenda_medica_api, url_prefix=version1)
 app.register_blueprint(salapi, url_prefix=version1)
 
 app.register_blueprint(usuarioapi, url_prefix=version1)
+
+app.register_blueprint(disponibilidad_horaria_api, url_prefix=version1)

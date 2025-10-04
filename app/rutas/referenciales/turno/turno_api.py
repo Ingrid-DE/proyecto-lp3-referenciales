@@ -3,6 +3,8 @@ from app.dao.referenciales.turno.TurnoDao import TurnoDao
 
 turapi = Blueprint('turapi', __name__)
 
+DIAS_VALIDOS = ['MAÑANA', 'TARDE', 'NOCHE']
+
 # Obtener todos los turnos
 @turapi.route('/turnos', methods=['GET'])
 def getTurnos():
@@ -68,7 +70,12 @@ def addTurno():
             }), 400
 
     try:
-        descripcion = data['descripcion'].upper()
+        descripcion = data['descripcion'].strip().upper()
+        if descripcion not in DIAS_VALIDOS:
+            return jsonify({
+                'success': False,
+                'error': f'El turno debe ser uno de los siguientes: {", ".join(DIAS_VALIDOS)}.'
+            }), 400
         id_turno = turdao.guardarTurno(descripcion)
         if id_turno is not None:
             return jsonify({

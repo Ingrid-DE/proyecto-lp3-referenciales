@@ -6,7 +6,7 @@ Días
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Días</h3>
+    <h3>Listar Días   </h3>
 
     <!-- tarjeta -->
     <div class="card">
@@ -105,7 +105,12 @@ Días
       const id_dia = $('#id_dia').val();
       const nuevaDescripcion = $('#txtDescripcion').val();
       const tabla = $('#tbl').DataTable();
-
+      // Validar que la descripción no esté vacía
+      if(!nuevaDescripcion || nuevaDescripcion.trim() === "") {
+        Swal.fire("Error", "La descripción no puede estar vacía.", "error");
+        return;
+      }
+      
       if(id_dia) {
         // update
         fetch(`/api/v1/dias/${id_dia}`, {
@@ -121,7 +126,15 @@ Días
             Swal.fire("Actualizado", "El día ha sido actualizado correctamente.", "success");
           } else {
             Swal.fire(data.error);
+        
           }
+           if(data && !data.error && data.success) {
+            tabla.ajax.reload();
+            Swal.fire("Cuidado", "No puede habler datos duplicados.", "error");
+          } else {
+            Swal.fire(data.error);
+          }
+
         }).catch(err => {
           console.error(err);
           Swal.fire("Error", "Ocurrió un error al actualizar el día.", "error");

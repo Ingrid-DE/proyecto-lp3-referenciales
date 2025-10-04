@@ -77,7 +77,7 @@ def addDia():
         if descripcion not in DIAS_VALIDOS:
             return jsonify({
                 'success': False,
-                'error': 'El consultorio no brinda atención los Domingos.'
+                'error': 'No se pueden duplicar los datos.'
             }), 400
 
 
@@ -118,7 +118,7 @@ def updateDia(dia_id):
     if descripcion not in DIAS_VALIDOS:
         return jsonify({
             'success': False,
-            'error': 'El consultorio no brinda atención los Domingos.'
+            'error': 'Cuidado al registar los dias, no puede haber duplicados.'
         }), 400
     
     try:

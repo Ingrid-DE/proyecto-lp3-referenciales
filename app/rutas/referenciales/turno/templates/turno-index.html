@@ -137,7 +137,7 @@ Turnos
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Agregado", "El Turno ha sido agregado correctamente.", "success");
+            Swal.fire("Cuidado", "Los datos no se pueden duplicar ya existen.", "error");
           } else {
             Swal.fire(data.error);
           }

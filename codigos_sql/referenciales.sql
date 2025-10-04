@@ -115,7 +115,7 @@ CREATE TABLE
 		FOREIGN KEY(id_medico) REFERENCES medicos(id_medico)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
 		FOREIGN KEY(id_especialidad) REFERENCES especialidades(id_especialidad)
-		ON DELETE RESTRICT ON UPDATE CASCADE,
+		O DELETE RESTRICT ON UPDATE CASCADE,
     	FOREIGN KEY(id_dia) REFERENCES dias(id_dia)
 		ON DELETE RESTRICT ON UPDATE CASCADE,
 		FOREIGN KEY(id_sala_atencion) REFERENCES sala_atenciones(id_sala_atencion)
@@ -126,38 +126,36 @@ CREATE TABLE
     	ON DELETE RESTRICT ON UPDATE CASCADE
 	);
 
-CREATE TABLE
-	disponibilidad_horaria(
-		id_disponibilidad_horaria serial PRIMARY KEY,
-		dis_horas varchar(60) UNIQUE,
-		dis_estado varchar(60) UNIQUE,
-		id_agenda_medica INTEGER NOT NULL,
-		FOREIGN KEY(id_agenda_medica) REFERENCES agenda_medicas(id_agenda_medica)
-		ON DELETE RESTRICT ON UPDATE CASCADE
-	);
+CREATE TABLE disponibilidad_horaria (
+    id_disponibilidad_horaria SERIAL PRIMARY KEY,
+    id_agenda_medica INTEGER NOT NULL,
+    fecha DATE NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL,
+    estado BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (id_agenda_medica) REFERENCES agenda_medicas(id_agenda_medica)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT uq_disponibilidad UNIQUE (id_agenda_medica, fecha, hora_inicio, hora_fin)
+);
 
-CREATE TABLE
-	estado_citas(
-		id_estado_cita serial PRIMARY KEY
-		, descripcion varchar(60) UNIQUE
-	);
-
-CREATE TABLE
-	citas(
-		id_cita serial PRIMARY KEY,
-		id_agenda_medica INTEGER NOT NULL,
-		id_paciente INTEGER NOT NULL,
-		fecha DATE NOT NULL,
-	    hora TIME NOT NULL,
-		obcervacion TEXT,
-		id_estado_cita INTEGER NOT NULL,
-		FOREIGN KEY(id_agenda_medica) REFERENCES agenda_medicas(id_agenda_medica)
-		ON DELETE RESTRICT ON UPDATE CASCADE,
-		FOREIGN KEY(id_paciente) REFERENCES pacientes(id_paciente)
-		ON DELETE RESTRICT ON UPDATE CASCADE,
-		FOREIGN KEY(id_estado_cita) REFERENCES estado_citas(id_estado_cita)
-		ON DELETE RESTRICT ON UPDATE CASCADE
-    );
+-- ===========================
+-- 3. Tabla: citas
+-- ===========================
+CREATE TABLE citas (
+    id_cita SERIAL PRIMARY KEY,
+    id_disponibilidad_horaria INTEGER NOT NULL,
+    id_paciente INTEGER NOT NULL,
+	fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    observacion VARCHAR(200),
+    id_estado_cita INTEGER NOT NULL,
+    FOREIGN KEY (id_disponibilidad_horaria) REFERENCES disponibilidad_horaria(id_disponibilidad_horaria)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (id_paciente) REFERENCES pacientes(id_paciente)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (id_estado_cita) REFERENCES estado_citas(id_estado_cita)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT uq_cita UNIQUE (id_disponibilidad_horaria) -- evita doble reserva
+);
 
 CREATE TABLE
     notificaciones(

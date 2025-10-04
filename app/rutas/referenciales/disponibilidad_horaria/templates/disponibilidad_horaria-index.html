@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+
+{% block titulo %}
+Disponibilidad Horaria
+{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h3>Listar Disponibilidad Horaria</h3>
+
+    <!-- tarjeta -->
+    <div class="card">
+      <div class="card-header">
+        <button type="button" class="btn btn-success" id="btnAgregar">Agregar</button>
+      </div>
+      <div class="card-body">
+        <table class="table table-striped" id="tbl">
+          <thead>
+            <tr>
+              <th>Médico:</th>
+              <th>Especialidad:</th>
+              <th>Día:</th>
+              <th>Turno:</th>
+              <th>Sala:</th>
+              <th>Fecha:</th>
+              <th>Hora Inicio:</th>
+              <th>Hora Fin:</th>
+              <th>Estado:</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- /tarjeta -->
+
+    <!-- Modal Formulario -->
+    <div class="modal" id="modalFormulario">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title" id="modalTitle"></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">
+            <div class="form-group">
+              <input type="hidden" id="txtIdDisponibilidad">
+              <input type="hidden" id="id_agenda_medica">
+              <label for="txtAgendaMedica">Agenda Médica:</label>
+              <input type="text" class="form-control" placeholder="Clik para seleccionar agenda médica" id="txtAgendaMedica">
+              <label for="txtFecha">Fecha:</label>
+              <input type="date" class="form-control" id="txtFecha">
+              <label for="txtHoraInicio">Hora Inicio:</label>
+              <input type="time" class="form-control" id="txtHoraInicio">
+              <label for="txtHoraFin">Hora Fin:</label>
+              <input type="time" class="form-control" id="txtHoraFin">
+              <label for="txtEstado">Estado:</label>
+              <select class="form-control" id="txtEstado">
+                <option value="true">Disponible</option>
+                <option value="false">No Disponible</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-success" id="btnGuardar">Guardar</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal Buscar Agenda Médica -->
+    <div class="modal" id="modalBuscarAgenda">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="modalAgendaTitle">Seleccionar Agenda Médica</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered w-100" id="tblAgenda">
+                <thead>
+                  <tr>
+                    <th>Médico</th>
+                    <th>Especialidad</th>
+                    <th>Día</th>
+                    <th>Turno</th>
+                    <th>Sala</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4 d-none" id="rowAlerta">
+        <div class="col col-md-12">
+            <div class="alert alert-success">
+                <strong>Registro Exitoso!</strong>
+                <div class="row" id="mostrarAlerta"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script> 
+  const initDatatable = () => {
+    $('#tbl').DataTable({
+      language: {
+        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+      },
+      ajax:'/api/v1/disponibilidades',      
+      columns: [
+        { data: 'medico' },
+        { data: 'especialidad' },
+        { data: 'dia' },
+        { data: 'turno' },
+        { data: 'sala' },
+        { data: 'fecha' },
+        { data: 'hora_inicio' },
+        { data: 'hora_fin' },
+        { data: function(row) {
+            return row.estado ? '<span class="badge badge-success">Disponible</span>' : '<span class="badge badge-secondary">No Disponible</span>';
+          }
+        },
+        { data: function(row) {
+            return `<button type="button" name="btn_editar" class="btn btn-success" data-id="${row.id_disponibilidad_horaria}">Editar</button>
+                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_disponibilidad_horaria}">Eliminar</button>`
+          }
+        }
+      ]
+    });
+  }
+  
+  const initDatatableAgenda = () => {
+    $('#tblAgenda').DataTable({
+      language: {
+        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+      },
+      ajax:'/api/v1/agenda_medicas',
+      columns: [
+        { data: function(row) {
+            return row.nombre + ' ' + row.apellido;
+          }
+        },
+        { data: 'especialidad' },
+        { data: 'dia' },
+        { data: 'turno' },
+        { data: 'sala_atencion' },
+        { data: function(row) {
+            return `<button type="button" name="btn_seleccionar_agenda" class="btn btn-success" data-id="${row.id_agenda_medica}" data-medico="${row.nombre} ${row.apellido}" data-especialidad="${row.especialidad}" data-dia="${row.dia}" data-turno="${row.turno}" data-sala="${row.sala_atencion}"><i class="fa fa-check"></i> Seleccionar</button>`;
+          }
+        }
+      ]
+    });
+    $('#tblAgenda').on('click', 'button[name="btn_seleccionar_agenda"]', function () {
+      const idAgenda = $(this).data('id');
+      const medico = $(this).data('medico');
+      const especialidad = $(this).data('especialidad');
+      const dia = $(this).data('dia');
+      const turno = $(this).data('turno');
+      const sala = $(this).data('sala');
+      $('#txtAgendaMedica').val(`${medico} - ${especialidad} - ${dia} - ${turno} - ${sala}`);
+      $('#id_agenda_medica').val(idAgenda);
+      $('#modalBuscarAgenda').modal('hide');
+    });
+  }
+
+  const buscarAgenda = () => {
+    $('#txtAgendaMedica').on('click', function () {
+      $('#modalAgendaTitle').text("Seleccionar Agenda Médica");
+      $('#modalBuscarAgenda').modal();
+    });
+  }
+
+  const agregar = () => {
+    $('#btnAgregar').on('click', function(){
+      $('#modalTitle').text("Agregar Disponibilidad Horaria");
+      $('#txtIdDisponibilidad').val("");
+      $('#txtAgendaMedica').val("");
+      $('#id_agenda_medica').val("");
+      $('#txtFecha').val("");
+      $('#txtHoraInicio').val("");
+      $('#txtHoraFin').val("");
+      $('#txtEstado').val("true");
+      $('#modalFormulario').modal();
+    });
+  }
+
+  const guardar = () => {
+    $('#btnGuardar').on('click', function() {
+      const idDisponibilidad = $('#txtIdDisponibilidad').val();
+      const id_agenda_medica = $('#id_agenda_medica').val();
+      const fecha = $('#txtFecha').val();
+      const hora_inicio = $('#txtHoraInicio').val();
+      const hora_fin = $('#txtHoraFin').val();
+      const estado = $('#txtEstado').val() === 'true';
+      const tabla = $('#tbl').DataTable();
+
+      if (idDisponibilidad) {
+        // Update
+        fetch(`/api/v1/disponibilidades/${idDisponibilidad}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }, body: JSON.stringify({
+            id_agenda_medica: id_agenda_medica,
+            fecha: fecha,
+            hora_inicio: hora_inicio,
+            hora_fin: hora_fin,
+            estado: estado
+          })
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if(data && !data.error && data.success) {
+            tabla.ajax.reload();
+            Swal.fire("Actualizado", "La disponibilidad horaria ha sido actualizada correctamente.", "success");
+          } else {
+            Swal.fire(data.error);
+          }
+        }).catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Ocurrió un error al actualizar la disponibilidad horaria.", "error");
+        });
+      } else {
+        // Insert
+        fetch(`/api/v1/disponibilidades`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }, body: JSON.stringify({
+            id_agenda_medica: id_agenda_medica,
+            fecha: fecha,
+            hora_inicio: hora_inicio,
+            hora_fin: hora_fin,
+            estado: estado
+          })
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if(data && !data.error && data.success) {
+            tabla.ajax.reload();
+            Swal.fire("Agregado", "La disponibilidad horaria ha sido agregada correctamente.", "success");
+          } else {
+            Swal.fire(data.error);
+          }
+        }).catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Ocurrió un error al guardar la disponibilidad horaria.", "error");
+        });
+      }
+      $('#modalFormulario').modal("hide");
+    });
+  }
+
+  const editar = () => {
+    $('#tbl').on('click', 'button[name="btn_editar"]', function(){
+      Swal.fire({
+        title: "¿Deseas editar este registro?",
+        showCancelButton: true,
+        confirmButtonText: "Sí",
+        cancelButtonText: `No`
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $('#modalTitle').text("Editar Disponibilidad Horaria");
+
+          const idDisponibilidad = $(this).data('id');
+          $('#txtIdDisponibilidad').val(idDisponibilidad);
+          fetch(`/api/v1/disponibilidades/${idDisponibilidad}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(resp => resp.json())
+          .then(data => {
+            $('#txtIdDisponibilidad').val(data.data.id_disponibilidad_horaria);
+            $('#id_agenda_medica').val(data.data.id_agenda_medica);
+            $('#txtAgendaMedica').val(data.data.agenda_medica);
+            $('#txtFecha').val(data.data.fecha);
+            $('#txtHoraInicio').val(data.data.hora_inicio);
+            $('#txtHoraFin').val(data.data.hora_fin);
+            $('#txtEstado').val(data.data.estado.toString());
+            $('#modalFormulario').modal();
+          });
+        }
+      });
+    });
+  }
+
+  const eliminar = () => {
+    $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
+      const idDisponibilidad = $(this).data('id');
+      Swal.fire({
+        title: "¿Deseas eliminar este registro?",
+        showCancelButton: true,
+        confirmButtonText: "Sí",
+        cancelButtonText: `No`
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/api/v1/disponibilidades/${idDisponibilidad}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(resp => resp.json())
+          .then(data => {
+            if(data && !data.error && data.success) {
+              const fila = $(this).closest('tr');
+              const tabla = $('#tbl').DataTable();
+              tabla.row(fila).remove().draw();
+              Swal.fire("Eliminado", "", data.success);
+            } else {
+              Swal.fire(data.error);
+            }
+          }).catch(err => {
+            Swal.fire("Error", "Ocurrió un error al eliminar la disponibilidad horaria.", "error");
+          });
+        }
+      });
+    });
+  }
+
+  const addEvents = () => {
+    agregar();
+    guardar();
+    editar();
+    eliminar();
+    buscarAgenda();
+  }
+
+  $(function() {
+    initDatatable();
+    initDatatableAgenda();
+    addEvents();
+  }); 
+</script> 
+{% endblock %}
