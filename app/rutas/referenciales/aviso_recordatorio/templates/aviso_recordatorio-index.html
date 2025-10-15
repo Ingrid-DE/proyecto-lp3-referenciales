@@ -1,0 +1,468 @@
+{% extends 'base.html' %}
+
+{% block titulo %}
+Avisos Recordatorios
+{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h3><i class="bi bi-bell"></i> Gestión de Avisos Recordatorios</h3>
+
+    <div class="card mt-3">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Lista de Avisos</h5>
+                <div>
+                    <button class="btn btn-light btn-sm" id="btnAgregar">
+                        <i class="bi bi-plus-circle"></i> Nuevo Aviso
+                    </button>
+                    <button class="btn btn-success btn-sm" id="btnPendientes">
+                        <i class="bi bi-clock"></i> Ver Pendientes
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <table id="tablaAvisos" class="table table-striped table-bordered table-hover" style="width:100%">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Paciente</th>
+                        <th>Médico</th>
+                        <th>Especialidad</th>
+                        <th>Fecha Cita</th>
+                        <th>Hora</th>
+                        <th>Programado</th>
+                        <th>Método</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Agregar/Editar Aviso -->
+<div class="modal fade" id="modalAviso" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalTitle">Nuevo Aviso Recordatorio</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formAviso">
+                    <input type="hidden" id="idAviso">
+                    
+                    <!-- Seleccionar Cita -->
+                    <div class="mb-3">
+                        <label class="form-label">Cita <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="hidden" id="idCita">
+                            <input type="text" class="form-control" id="txtCita" readonly placeholder="Seleccione una cita">
+                            <button type="button" class="btn btn-outline-primary" id="btnSeleccionarCita">
+                                <i class="bi bi-search"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Método de Envío -->
+                    <div class="mb-3">
+                        <label class="form-label">Método de Envío <span class="text-danger">*</span></label>
+                        <select class="form-select" id="metodoEnvio" required>
+                            <option value="">Seleccione...</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="email">Email</option>
+                            <option value="sms">SMS</option>
+                        </select>
+                    </div>
+
+                    <!-- Destinatario -->
+                    <div class="mb-3">
+                        <label class="form-label">Destinatario (Email/Teléfono) <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="destinatario" placeholder="+595981234567 o email@ejemplo.com" required>
+                        <small class="text-muted">Se llenará automáticamente al seleccionar la cita</small>
+                    </div>
+
+                    <!-- Fecha Programada -->
+                    <div class="mb-3">
+                        <label class="form-label">Fecha y Hora Programada <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" id="fechaProgramada" required>
+                        <small class="text-muted">Se programará automáticamente 24 horas antes de la cita</small>
+                    </div>
+
+                    <!-- Mensaje -->
+                    <div class="mb-3">
+                        <label class="form-label">Mensaje Personalizado</label>
+                        <textarea class="form-control" id="mensaje" rows="5" placeholder="Mensaje del recordatorio (opcional, se generará automáticamente si está vacío)"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarAviso">
+                    <i class="bi bi-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Seleccionar Cita -->
+<div class="modal fade" id="modalCitas" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Seleccionar Cita</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Se muestran solo las citas futuras que aún no tienen aviso recordatorio
+                </div>
+                <table id="tablaCitas" class="table table-striped table-bordered" style="width:100%">
+                    <thead class="table-info">
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Médico</th>
+                            <th>Especialidad</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Estado</th>
+                            <th>Teléfono</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Ver Mensaje -->
+<div class="modal fade" id="modalVerMensaje" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title">Vista Previa del Mensaje</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="contenidoMensaje" class="p-3 border rounded bg-light" style="white-space: pre-wrap;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+$(document).ready(function () {
+    let tablaCitas = null;
+    
+    // Inicializar DataTable principal
+    const tabla = $('#tablaAvisos').DataTable({
+        language: {
+            url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}"
+        },
+        ajax: {
+            url: '/api/v1/avisos',
+            dataSrc: 'data'
+        },
+        columns: [
+            { data: 'id_aviso' },
+            { data: 'paciente' },
+            { data: 'medico' },
+            { data: 'especialidad' },
+            { data: 'fecha' },
+            { data: 'hora' },
+            { data: 'fecha_programada' },
+            { 
+                data: 'metodo_envio',
+                render: function(data) {
+                    const iconos = {
+                        'whatsapp': '<i class="bi bi-whatsapp text-success"></i> WhatsApp',
+                        'email': '<i class="bi bi-envelope text-primary"></i> Email',
+                        'sms': '<i class="bi bi-chat-dots text-info"></i> SMS'
+                    };
+                    return iconos[data] || data;
+                }
+            },
+            { 
+                data: 'estado',
+                render: function(data) {
+                    const badges = {
+                        'pendiente': '<span class="badge bg-warning">Pendiente</span>',
+                        'enviado': '<span class="badge bg-success">Enviado</span>',
+                        'fallido': '<span class="badge bg-danger">Fallido</span>',
+                        'cancelado': '<span class="badge bg-secondary">Cancelado</span>'
+                    };
+                    return badges[data] || data;
+                }
+            },
+            {
+                data: null,
+                render: function (data) {
+                    let botones = `
+                        <button class="btn btn-info btn-sm ver-mensaje" data-mensaje="${data.mensaje}" title="Ver mensaje">
+                            <i class="bi bi-eye"></i>
+                        </button>`;
+                    
+                    if (data.estado === 'pendiente') {
+                        botones += `
+                            <button class="btn btn-success btn-sm enviar" data-id="${data.id_aviso}" title="Enviar ahora">
+                                <i class="bi bi-send"></i>
+                            </button>
+                            <button class="btn btn-warning btn-sm editar" data-id="${data.id_aviso}" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>`;
+                    }
+                    
+                    botones += `
+                        <button class="btn btn-danger btn-sm eliminar" data-id="${data.id_aviso}" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </button>`;
+                    
+                    return botones;
+                }
+            }
+        ],
+        order: [[0, 'desc']]
+    });
+
+    // Botón Agregar Nuevo Aviso
+    $('#btnAgregar').click(function() {
+        $('#modalTitle').text('Nuevo Aviso Recordatorio');
+        $('#formAviso')[0].reset();
+        $('#idAviso').val('');
+        $('#idCita').val('');
+        $('#modalAviso').modal('show');
+    });
+
+    // Botón Ver Pendientes
+    $('#btnPendientes').click(function() {
+        window.location.href = '/avisos_recordatorio/pendientes';
+    });
+
+    // Botón Seleccionar Cita
+    $('#btnSeleccionarCita').click(function() {
+        cargarCitasDisponibles();
+        $('#modalCitas').modal('show');
+    });
+
+    // Cargar citas disponibles
+    function cargarCitasDisponibles() {
+        if (tablaCitas) {
+            tablaCitas.destroy();
+        }
+        
+        tablaCitas = $('#tablaCitas').DataTable({
+            language: {
+                url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}"
+            },
+            ajax: {
+                url: '/api/v1/avisos/citas-disponibles',
+                dataSrc: 'data'
+            },
+            columns: [
+                { data: 'paciente' },
+                { data: 'medico' },
+                { data: 'especialidad' },
+                { data: 'fecha' },
+                { data: 'hora_inicio' },
+                { 
+                    data: 'estado_cita',
+                    render: function(data) {
+                        return `<span class="badge bg-info">${data}</span>`;
+                    }
+                },
+                { data: 'telefono' },
+                {
+                    data: null,
+                    render: function(data) {
+                        return `<button class="btn btn-primary btn-sm seleccionar-cita" 
+                                    data-id="${data.id_cita}"
+                                    data-paciente="${data.paciente}"
+                                    data-medico="${data.medico}"
+                                    data-especialidad="${data.especialidad}"
+                                    data-fecha="${data.fecha}"
+                                    data-hora="${data.hora_inicio}"
+                                    data-telefono="${data.telefono}">
+                                    <i class="bi bi-check-circle"></i> Seleccionar
+                                </button>`;
+                    }
+                }
+            ]
+        });
+    }
+
+    // Seleccionar una cita
+    $('#tablaCitas').on('click', '.seleccionar-cita', function() {
+        const btn = $(this);
+        const idCita = btn.data('id');
+        const paciente = btn.data('paciente');
+        const medico = btn.data('medico');
+        const especialidad = btn.data('especialidad');
+        const fecha = btn.data('fecha');
+        const hora = btn.data('hora');
+        const telefono = btn.data('telefono');
+        
+        // Llenar campos del formulario
+        $('#idCita').val(idCita);
+        $('#txtCita').val(`${paciente} - ${medico} (${especialidad}) - ${fecha} ${hora}`);
+        $('#destinatario').val(telefono);
+        
+        // Calcular fecha programada (24 horas antes de la cita)
+        const fechaCita = new Date(fecha.split('/').reverse().join('-') + 'T' + hora);
+        fechaCita.setHours(fechaCita.getHours() - 24);
+        const fechaProgramada = fechaCita.toISOString().slice(0, 16);
+        $('#fechaProgramada').val(fechaProgramada);
+        
+        $('#modalCitas').modal('hide');
+    });
+
+    // Guardar Aviso
+    $('#btnGuardarAviso').click(function() {
+        const idAviso = $('#idAviso').val();
+        const idCita = $('#idCita').val();
+        const fechaProgramada = $('#fechaProgramada').val();
+        const metodoEnvio = $('#metodoEnvio').val();
+        const mensaje = $('#mensaje').val();
+        const destinatario = $('#destinatario').val();
+
+        // Validaciones
+        if (!idCita) {
+            Swal.fire('Error', 'Debe seleccionar una cita', 'error');
+            return;
+        }
+        if (!fechaProgramada || !metodoEnvio || !destinatario) {
+            Swal.fire('Error', 'Complete todos los campos obligatorios', 'error');
+            return;
+        }
+
+        const datos = {
+            id_cita: idCita,
+            fecha_programada: fechaProgramada,
+            metodo_envio: metodoEnvio,
+            mensaje: mensaje,
+            destinatario: destinatario
+        };
+
+        const url = idAviso ? `/api/v1/avisos/${idAviso}` : '/api/v1/avisos';
+        const method = idAviso ? 'PUT' : 'POST';
+
+        $.ajax({
+            url: url,
+            type: method,
+            contentType: 'application/json',
+            data: JSON.stringify(datos),
+            success: function(resp) {
+                if (resp.success) {
+                    Swal.fire('Éxito', idAviso ? 'Aviso actualizado' : 'Aviso creado correctamente', 'success');
+                    $('#modalAviso').modal('hide');
+                    tabla.ajax.reload();
+                } else {
+                    Swal.fire('Error', resp.error, 'error');
+                }
+            },
+            error: function(xhr) {
+                const error = xhr.responseJSON?.error || 'Error al guardar el aviso';
+                Swal.fire('Error', error, 'error');
+            }
+        });
+    });
+
+    // Editar Aviso
+    $('#tablaAvisos').on('click', '.editar', function() {
+        const idAviso = $(this).data('id');
+        
+        $.get(`/api/v1/avisos/${idAviso}`, function(resp) {
+            if (resp.success) {
+                const aviso = resp.data;
+                $('#modalTitle').text('Editar Aviso Recordatorio');
+                $('#idAviso').val(aviso.id_aviso);
+                $('#idCita').val(aviso.id_cita);
+                $('#txtCita').val(`${aviso.paciente} - ${aviso.medico} (${aviso.especialidad})`);
+                $('#fechaProgramada').val(aviso.fecha_programada);
+                $('#metodoEnvio').val(aviso.metodo_envio);
+                $('#mensaje').val(aviso.mensaje);
+                $('#destinatario').val(aviso.destinatario);
+                $('#modalAviso').modal('show');
+            }
+        });
+    });
+
+    // Ver Mensaje
+    $('#tablaAvisos').on('click', '.ver-mensaje', function() {
+        const mensaje = $(this).data('mensaje');
+        $('#contenidoMensaje').text(mensaje || 'Sin mensaje');
+        $('#modalVerMensaje').modal('show');
+    });
+
+    // Enviar aviso (simulado)
+    $('#tablaAvisos').on('click', '.enviar', function() {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: '¿Enviar recordatorio?',
+            text: 'Se enviará el aviso por el método configurado',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, enviar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#28a745'
+        }).then(res => {
+            if (res.isConfirmed) {
+                $.post(`/api/v1/avisos/enviar/${id}`, function(resp) {
+                    if (resp.success) {
+                        Swal.fire('Enviado', resp.message, 'success');
+                        tabla.ajax.reload();
+                    } else {
+                        Swal.fire('Error', resp.error, 'error');
+                    }
+                }).fail(function(xhr) {
+                    Swal.fire('Error', xhr.responseJSON?.error || 'No se pudo enviar el aviso', 'error');
+                });
+            }
+        });
+    });
+
+    // Eliminar aviso
+    $('#tablaAvisos').on('click', '.eliminar', function() {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: '¿Eliminar este aviso?',
+            text: 'Esta acción no se puede deshacer',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#dc3545'
+        }).then(res => {
+            if (res.isConfirmed) {
+                $.ajax({
+                    url: `/api/v1/avisos/${id}`,
+                    type: 'DELETE',
+                    success: function(resp) {
+                        if (resp.success) {
+                            Swal.fire('Eliminado', resp.message, 'success');
+                            tabla.ajax.reload();
+                        } else {
+                            Swal.fire('Error', resp.error, 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error', xhr.responseJSON?.error || 'No se pudo eliminar el aviso', 'error');
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

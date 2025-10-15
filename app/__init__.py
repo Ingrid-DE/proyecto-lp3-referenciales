@@ -27,12 +27,20 @@ from app.rutas.referenciales.dia.dia_routes import diamod
 from app.rutas.referenciales.especialidad.especialidad_routes import espmod
 from app.rutas.referenciales.estado_cita.estado_cita_routes import estdmod
 from app.rutas.referenciales.estado_laboral.estado_laboral_routes import estado_laboralmod
-from app.rutas.referenciales.ficha.ficha_routes import fichamod
 from app.rutas.referenciales.agenda_medica.agenda_medica_routes import agendamedmod
 from app.rutas.referenciales.sala_atencion.sala_atencion_routes import salmod
 from app.rutas.referenciales.usuario.usuario_routes import usumod
 from app.rutas.referenciales.disponibilidad_horaria.disponibilidad_horaria_routes import disponibilidad_horariamod
-# registrar referenciales
+from app.rutas.referenciales.cita.cita_routes import citamod
+from app.rutas.referenciales.aviso_recordatorio.aviso_recordatorio_routes import aviso_mod
+
+# registrar los blueprints
+
+modulo0 = '/referenciales'
+app.register_blueprint(aviso_mod, url_prefix=f'{modulo0}/aviso_recordatorio')
+
+from app.rutas.referenciales.aviso_recordatorio.aviso_recordatorio_api import aviso_api
+
 modulo0 = '/referenciales'
 app.register_blueprint(ciumod, url_prefix=f'{modulo0}/ciudad')
 
@@ -99,11 +107,6 @@ app.register_blueprint(estdmod, url_prefix=f'{modulo0}/estado_cita')
 from app.rutas.referenciales.estado_cita.estado_cita_api import estadoapi
 
 modulo0 = '/referenciales'
-app.register_blueprint(fichamod, url_prefix=f'{modulo0}/ficha')
-
-from app.rutas.referenciales.ficha.ficha_api import fichaapi
-
-modulo0 = '/referenciales'
 app.register_blueprint(agendamedmod, url_prefix=f'{modulo0}/agenda_medica')
 
 from app.rutas.referenciales.agenda_medica.agenda_medica_api import agenda_medica_api
@@ -123,10 +126,18 @@ app.register_blueprint(disponibilidad_horariamod, url_prefix=f'{modulo0}/disponi
 
 from app.rutas.referenciales.disponibilidad_horaria.disponinilidad_horaria_api import disponibilidad_horaria_api
 
+modulo0 = '/referenciales'
+app.register_blueprint(citamod, url_prefix=f'{modulo0}/cita')
+
+from app.rutas.referenciales.cita.cita_api import cita_api
+
+
 # APIS v1
 version1 = '/api/v1'
 app.register_blueprint(ciuapi, url_prefix=version1)
-    
+
+app.register_blueprint(aviso_api, url_prefix=version1)
+
 app.register_blueprint(estado_laboralapi, url_prefix=version1)
 
 app.register_blueprint(personaapi, url_prefix=version1)
@@ -151,8 +162,6 @@ app.register_blueprint(espapi, url_prefix=version1)
 
 app.register_blueprint(estadoapi, url_prefix=version1)
 
-app.register_blueprint(fichaapi, url_prefix=version1)
-
 app.register_blueprint(agenda_medica_api, url_prefix=version1)
 
 app.register_blueprint(salapi, url_prefix=version1)
@@ -160,3 +169,5 @@ app.register_blueprint(salapi, url_prefix=version1)
 app.register_blueprint(usuarioapi, url_prefix=version1)
 
 app.register_blueprint(disponibilidad_horaria_api, url_prefix=version1)
+
+app.register_blueprint(cita_api, url_prefix=version1)

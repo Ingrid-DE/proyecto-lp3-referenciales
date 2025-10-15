@@ -138,6 +138,17 @@ CREATE TABLE disponibilidad_horaria (
     CONSTRAINT uq_disponibilidad UNIQUE (id_agenda_medica, fecha, hora_inicio, hora_fin)
 );
 
+CREATE TABLE estado_citas(
+    id_estado_cita serial PRIMARY KEY,
+    descripcion varchar(60) UNIQUE NOT NULL
+);
+
+INSERT INTO estado_citas (descripcion) VALUES 
+    ('Pendiente'),
+    ('Confirmada'),
+    ('Cancelada'),
+    ('Completada'),
+    ('No Asistió');
 -- ===========================
 -- 3. Tabla: citas
 -- ===========================
@@ -157,8 +168,16 @@ CREATE TABLE citas (
     CONSTRAINT uq_cita UNIQUE (id_disponibilidad_horaria) -- evita doble reserva
 );
 
-CREATE TABLE
-    notificaciones(
-        id_notificacion serial PRIMARY KEY,
-        id_cita INTEGER NOT NULL
-	);
+
+CREATE TABLE avisos_recordatorios (
+    id_aviso SERIAL PRIMARY KEY,
+    id_cita INTEGER NOT NULL,  -- Foreign key a la tabla citas
+    fecha_programada TIMESTAMP NOT NULL,  -- Fecha y hora en que se debe enviar el recordatorio (e.g., 24 horas antes de la cita)
+    fecha_envio TIMESTAMP,  -- Fecha y hora en que se envió el recordatorio
+    metodo_envio VARCHAR(50) NOT NULL,  -- Método de envío: 'email', 'sms', etc.
+    estado VARCHAR(50) NOT NULL DEFAULT 'pendiente',  -- Estado: 'pendiente', 'enviado', 'fallido'
+    mensaje TEXT,  -- Contenido del mensaje de recordatorio
+    FOREIGN KEY (id_cita) REFERENCES citas(id_cita)
+        ON DELETE CASCADE ON UPDATE CASCADE  -- Si se elimina la cita, se elimina el recordatorio
+);
+
