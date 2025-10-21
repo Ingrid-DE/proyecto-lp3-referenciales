@@ -1,0 +1,730 @@
+{% extends 'base.html' %}
+
+{% block titulo %}
+Consultas Médicas
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="text-success"><i class="bi bi-clipboard2-pulse"></i> Gestión de Consultas Médicas</h3>
+    </div>
+
+    <!-- tarjeta -->
+    <div class="card shadow">
+      <div class="card-header bg-gradient-success text-white">
+        <button type="button" class="btn btn-light btn-sm" id="btnAgregar">
+          <i class="bi bi-plus-circle"></i> Nueva Consulta
+        </button>
+      </div>
+      <div class="card-body">
+        <table class="table table-striped table-bordered table-hover table-sm" id="tbl">
+          <thead class="table-success">
+            <tr>
+              <th>ID</th>
+              <th>Paciente</th>
+              <th>Médico</th>
+              <th>Especialidad</th>
+              <th>Fecha Cita</th>
+              <th>Hora</th>
+              <th>Motivo</th>
+              <th>Diagnóstico</th>
+              <th>Fecha Consulta</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- /tarjeta -->
+
+    <!-- Modal Formulario COMPACTO -->
+    <div class="modal fade" id="modalFormulario" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-success">
+        
+          <!-- Modal Header -->
+          <div class="modal-header bg-gradient-success text-white">
+            <h5 class="modal-title" id="modalTitle"><i class="bi bi-file-medical"></i> Nueva Consulta Médica</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+
+          <!-- Modal body COMPACTO -->
+          <div class="modal-body bg-light">
+            <form id="formConsulta">
+              <input type="hidden" id="txtIdConsulta">
+              
+              <!-- Cita - Compacto -->
+              <div class="mb-2">
+                <label class="form-label fw-bold text-success mb-1"><i class="bi bi-calendar-check"></i> Cita Médica <span class="text-danger">*</span></label>
+                <div class="input-group input-group-sm">
+                  <input type="hidden" id="id_cita">
+                  <input type="text" class="form-control" placeholder="Seleccione una cita" id="txtCita" readonly>
+                  <button type="button" class="btn btn-outline-success" id="btnSeleccionarCita">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Motivo - Compacto -->
+              <div class="mb-2">
+                <label class="form-label fw-bold text-primary mb-1"><i class="bi bi-chat-left-text"></i> Motivo de Consulta <span class="text-danger">*</span></label>
+                <textarea class="form-control form-control-sm" id="txtMotivo" rows="2" placeholder="Motivo de la consulta" required></textarea>
+              </div>
+
+              <!-- Diagnóstico y Tratamiento en 2 columnas -->
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label fw-bold text-info mb-1"><i class="bi bi-activity"></i> Diagnóstico</label>
+                  <textarea class="form-control form-control-sm" id="txtDiagnostico" rows="2" placeholder="Diagnóstico"></textarea>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label fw-bold text-success mb-1"><i class="bi bi-capsule"></i> Tratamiento</label>
+                  <textarea class="form-control form-control-sm" id="txtTratamiento" rows="2" placeholder="Tratamiento"></textarea>
+                </div>
+              </div>
+
+              <!-- Órdenes en 2 columnas compactas -->
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label fw-bold text-warning mb-1"><i class="bi bi-file-medical"></i> Orden Estudio</label>
+                  <div class="input-group input-group-sm">
+                    <input type="hidden" id="id_orden_estudio">
+                    <input type="text" class="form-control form-control-sm" placeholder="Seleccionar" id="txtOrdenEstudio" readonly>
+                    <button type="button" class="btn btn-warning btn-sm" id="btnSeleccionarOrdenEstudio" title="Seleccionar">
+                      <i class="bi bi-search"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnLimpiarOrdenEstudio" title="Limpiar">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-2">
+                  <label class="form-label fw-bold text-danger mb-1"><i class="bi bi-clipboard-pulse"></i> Orden Análisis</label>
+                  <div class="input-group input-group-sm">
+                    <input type="hidden" id="id_orden_analisis">
+                    <input type="text" class="form-control form-control-sm" placeholder="Seleccionar" id="txtOrdenAnalisis" readonly>
+                    <button type="button" class="btn btn-danger btn-sm" id="btnSeleccionarOrdenAnalisis" title="Seleccionar">
+                      <i class="bi bi-search"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnLimpiarOrdenAnalisis" title="Limpiar">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Observaciones - Compacto -->
+              <div class="mb-2">
+                <label class="form-label fw-bold text-secondary mb-1"><i class="bi bi-sticky"></i> Observaciones</label>
+                <textarea class="form-control form-control-sm" id="txtObservaciones" rows="2" placeholder="Observaciones adicionales"></textarea>
+              </div>
+            </form>
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+              <i class="bi bi-x-circle"></i> Cerrar
+            </button>
+            <button type="button" class="btn btn-success btn-sm" id="btnGuardar">
+              <i class="bi bi-save"></i> Guardar Consulta
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Buscar Cita -->
+    <div class="modal fade" id="modalBuscarCita" tabindex="-1">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-success">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title"><i class="bi bi-calendar-check"></i> Seleccionar Cita Médica</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info alert-dismissible fade show">
+              <i class="bi bi-info-circle"></i> Seleccione la cita médica para registrar la consulta
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered table-hover table-sm w-100" id="tblCita">
+                <thead class="table-success">
+                  <tr>
+                    <th>Paciente</th>
+                    <th>Cédula</th>
+                    <th>Médico</th>
+                    <th>Especialidad</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Sala</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Buscar Orden Estudio -->
+    <div class="modal fade" id="modalBuscarOrdenEstudio" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-warning">
+          <div class="modal-header bg-warning text-dark">
+            <h5 class="modal-title"><i class="bi bi-file-medical"></i> Seleccionar Orden de Estudio</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered table-hover table-sm w-100" id="tblOrdenEstudio">
+                <thead class="table-warning">
+                  <tr>
+                    <th>ID</th>
+                    <th>Tipo de Estudio</th>
+                    <th>Fecha Emisión</th>
+                    <th>Observación</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Buscar Orden Análisis -->
+    <div class="modal fade" id="modalBuscarOrdenAnalisis" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-danger">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title"><i class="bi bi-clipboard-pulse"></i> Seleccionar Orden de Análisis</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered table-hover table-sm w-100" id="tblOrdenAnalisis">
+                <thead class="table-danger">
+                  <tr>
+                    <th>ID</th>
+                    <th>Tipo de Análisis</th>
+                    <th>Fecha Emisión</th>
+                    <th>Observación</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+<style>
+  .bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  }
+  .modal-content {
+    border-width: 2px;
+  }
+  .form-label {
+    font-size: 0.9rem;
+  }
+  .input-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block js %}
+<script> 
+  const initDatatable = () => {
+    $('#tbl').DataTable({
+      language: {
+        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+      },
+      ajax: {
+        url: '/api/v1/consultas',
+        dataSrc: 'data'
+      },      
+      columns: [
+        { data: 'id_consulta' },
+        { data: 'paciente' },
+        { data: 'medico' },
+        { data: 'especialidad' },
+        { data: 'fecha' },
+        { data: 'hora' },
+        { 
+          data: 'motivo_consulta',
+          render: function(data) {
+            return data.length > 50 ? data.substring(0, 50) + '...' : data;
+          }
+        },
+        { 
+          data: 'diagnostico',
+          render: function(data) {
+            if (!data) return '<span class="text-muted">Sin diagnóstico</span>';
+            return data.length > 50 ? data.substring(0, 50) + '...' : data;
+          }
+        },
+        { data: 'fecha_consulta' },
+        { 
+          data: function(row) {
+            return `<button type="button" name="btn_editar" class="btn btn-primary btn-sm" data-id="${row.id_consulta}" title="Editar">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" name="btn_eliminar" class="btn btn-danger btn-sm" data-id="${row.id_consulta}" title="Eliminar">
+                      <i class="bi bi-trash"></i>
+                    </button>`;
+          }
+        }
+      ],
+      order: [[0, 'desc']]
+    });
+  }
+  
+  const initDatatableCita = () => {
+    $('#tblCita').DataTable({
+      language: {
+        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+      },
+      ajax: {
+        url: '/api/v1/consultas/citas-disponibles',
+        dataSrc: 'data'
+      },
+      columns: [
+        { data: 'paciente' },
+        { data: 'cedula' },
+        { data: 'medico' },
+        { data: 'especialidad' },
+        { data: 'fecha' },
+        { data: 'hora_inicio' },
+        { data: 'sala_atencion' },
+        { 
+          data: 'estado_cita',
+          render: function(data) {
+            const badges = {
+              'Confirmada': '<span class="badge bg-primary">Confirmada</span>',
+              'Completada': '<span class="badge bg-success">Completada</span>',
+              'Pendiente': '<span class="badge bg-warning">Pendiente</span>'
+            };
+            return badges[data] || `<span class="badge bg-secondary">${data}</span>`;
+          }
+        },
+        { 
+          data: function(row) {
+            return `<button type="button" name="btn_seleccionar_cita" class="btn btn-success btn-sm" 
+                      data-id="${row.id_cita}" 
+                      data-paciente="${row.paciente}" 
+                      data-medico="${row.medico}"
+                      data-especialidad="${row.especialidad}"
+                      data-fecha="${row.fecha}"
+                      data-hora="${row.hora_inicio}">
+                      <i class="bi bi-check-circle"></i> Seleccionar
+                    </button>`;
+          }
+        }
+      ]
+    });
+
+    $('#tblCita').on('click', 'button[name="btn_seleccionar_cita"]', function () {
+      const idCita = $(this).data('id');
+      const paciente = $(this).data('paciente');
+      const medico = $(this).data('medico');
+      const especialidad = $(this).data('especialidad');
+      const fecha = $(this).data('fecha');
+      const hora = $(this).data('hora');
+      
+      $('#txtCita').val(`${paciente} - Dr. ${medico} (${especialidad}) - ${fecha} ${hora}`);
+      $('#id_cita').val(idCita);
+      $('#modalBuscarCita').modal('hide');
+    });
+  }
+
+  const initDatatableOrdenEstudio = () => {
+    $('#tblOrdenEstudio').DataTable({
+      language: {
+        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+      },
+      ajax: {
+        url: '/api/v1/consultas/ordenes-estudio-disponibles',
+        dataSrc: 'data'
+      },
+      columns: [
+        { data: 'id_orden_estudio' },
+        { data: 'tipo_estudio' },
+        { data: 'fecha_emision' },
+        { 
+          data: 'observacion',
+          render: function(data) {
+            return data || '<span class="text-muted">Sin observación</span>';
+          }
+        },
+        { 
+          data: 'estado',
+          render: function(data) {
+            return `<span class="badge bg-warning text-dark">${data}</span>`;
+          }
+        },
+        { 
+          data: function(row) {
+            return `<button type="button" name="btn_seleccionar_orden_estudio" class="btn btn-success btn-sm" 
+                      data-id="${row.id_orden_estudio}" 
+                      data-tipo="${row.tipo_estudio}">
+                      <i class="bi bi-check-circle"></i> Seleccionar
+                    </button>`;
+          }
+        }
+      ]
+    });
+
+    $('#tblOrdenEstudio').on('click', 'button[name="btn_seleccionar_orden_estudio"]', function () {
+      const idOrdenEstudio = $(this).data('id');
+      const tipoEstudio = $(this).data('tipo');
+      
+      $('#txtOrdenEstudio').val(`${tipoEstudio} (ID: ${idOrdenEstudio})`);
+      $('#id_orden_estudio').val(idOrdenEstudio);
+      $('#modalBuscarOrdenEstudio').modal('hide');
+    });
+  }
+
+  const initDatatableOrdenAnalisis = () => {
+    $('#tblOrdenAnalisis').DataTable({
+      language: {
+        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+      },
+      ajax: {
+        url: '/api/v1/consultas/ordenes-analisis-disponibles',
+        dataSrc: 'data'
+      },
+      columns: [
+        { data: 'id_orden_analisis' },
+        { data: 'tipo_analisis' },
+        { data: 'fecha_emision' },
+        { 
+          data: 'observacion',
+          render: function(data) {
+            return data || '<span class="text-muted">Sin observación</span>';
+          }
+        },
+        { 
+          data: 'estado',
+          render: function(data) {
+            return `<span class="badge bg-danger">${data}</span>`;
+          }
+        },
+        { 
+          data: function(row) {
+            return `<button type="button" name="btn_seleccionar_orden_analisis" class="btn btn-success btn-sm" 
+                      data-id="${row.id_orden_analisis}" 
+                      data-tipo="${row.tipo_analisis}">
+                      <i class="bi bi-check-circle"></i> Seleccionar
+                    </button>`;
+          }
+        }
+      ]
+    });
+
+    $('#tblOrdenAnalisis').on('click', 'button[name="btn_seleccionar_orden_analisis"]', function () {
+      const idOrdenAnalisis = $(this).data('id');
+      const tipoAnalisis = $(this).data('tipo');
+      
+      $('#txtOrdenAnalisis').val(`${tipoAnalisis} (ID: ${idOrdenAnalisis})`);
+      $('#id_orden_analisis').val(idOrdenAnalisis);
+      $('#modalBuscarOrdenAnalisis').modal('hide');
+    });
+  }
+
+  const buscarCita = () => {
+    $('#btnSeleccionarCita').on('click', function () {
+      $('#tblCita').DataTable().ajax.reload();
+      $('#modalBuscarCita').modal('show');
+    });
+  }
+
+  const buscarOrdenEstudio = () => {
+    $('#btnSeleccionarOrdenEstudio').on('click', function () {
+      $('#tblOrdenEstudio').DataTable().ajax.reload();
+      $('#modalBuscarOrdenEstudio').modal('show');
+    });
+  }
+
+  const buscarOrdenAnalisis = () => {
+    $('#btnSeleccionarOrdenAnalisis').on('click', function () {
+      $('#tblOrdenAnalisis').DataTable().ajax.reload();
+      $('#modalBuscarOrdenAnalisis').modal('show');
+    });
+  }
+
+  const limpiarOrdenes = () => {
+    $('#btnLimpiarOrdenEstudio').on('click', function() {
+      $('#id_orden_estudio').val('');
+      $('#txtOrdenEstudio').val('');
+    });
+
+    $('#btnLimpiarOrdenAnalisis').on('click', function() {
+      $('#id_orden_analisis').val('');
+      $('#txtOrdenAnalisis').val('');
+    });
+  }
+
+  const agregar = () => {
+    $('#btnAgregar').on('click', function(){
+      $('#modalTitle').html('<i class="bi bi-file-medical"></i> Nueva Consulta Médica');
+      $('#txtIdConsulta').val("");
+      $('#id_cita').val("");
+      $('#txtCita').val("");
+      $('#txtMotivo').val("");
+      $('#txtDiagnostico').val("");
+      $('#txtTratamiento').val("");
+      $('#id_orden_estudio').val("");
+      $('#txtOrdenEstudio').val("");
+      $('#id_orden_analisis').val("");
+      $('#txtOrdenAnalisis').val("");
+      $('#txtObservaciones').val("");
+      $('#modalFormulario').modal('show');
+    });
+  }
+
+  const guardar = () => {
+    $('#btnGuardar').on('click', function() {
+      const idConsulta = $('#txtIdConsulta').val();
+      const id_cita = $('#id_cita').val();
+      const id_orden_estudio = $('#id_orden_estudio').val() || null;
+      const id_orden_analisis = $('#id_orden_analisis').val() || null;
+      const motivo_consulta = $('#txtMotivo').val();
+      const diagnostico = $('#txtDiagnostico').val();
+      const tratamiento = $('#txtTratamiento').val();
+      const observaciones = $('#txtObservaciones').val();
+      const tabla = $('#tbl').DataTable();
+
+      // Validaciones
+      if (!id_cita) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Debe seleccionar una cita médica"
+        });
+        return;
+      }
+      if (!motivo_consulta.trim()) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "El motivo de consulta es obligatorio"
+        });
+        return;
+      }
+
+      const datos = {
+        id_cita: id_cita,
+        id_orden_estudio: id_orden_estudio,
+        id_orden_analisis: id_orden_analisis,
+        motivo_consulta: motivo_consulta,
+        diagnostico: diagnostico,
+        tratamiento: tratamiento,
+        observaciones: observaciones
+      };
+
+      if (idConsulta) {
+        // Update
+        fetch(`/api/v1/consultas/${idConsulta}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }, 
+          body: JSON.stringify(datos)
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if(data && !data.error && data.success) {
+            tabla.ajax.reload();
+            Swal.fire({
+              icon: "success",
+              title: "Actualizado",
+              text: "La consulta ha sido actualizada correctamente."
+            });
+            $('#modalFormulario').modal("hide");
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: data.error
+            });
+          }
+        }).catch(err => {
+          console.error(err);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Ocurrió un error al actualizar la consulta."
+          });
+        });
+      } else {
+        // Insert
+        fetch(`/api/v1/consultas`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }, 
+          body: JSON.stringify(datos)
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if(data && !data.error && data.success) {
+            tabla.ajax.reload();
+            Swal.fire({
+              icon: "success",
+              title: "Agregado",
+              text: "La consulta ha sido agregada correctamente."
+            });
+            $('#modalFormulario').modal("hide");
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: data.error
+            });
+          }
+        }).catch(err => {
+          console.error(err);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Ocurrió un error al guardar la consulta."
+          });
+        });
+      }
+    });
+  }
+
+  const editar = () => {
+    $('#tbl').on('click', 'button[name="btn_editar"]', function(){
+      Swal.fire({
+        title: "¿Deseas editar este registro?",
+        showCancelButton: true,
+        confirmButtonText: "Sí",
+        cancelButtonText: `No`,
+        icon: "question"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $('#modalTitle').html('<i class="bi bi-file-medical"></i> Editar Consulta Médica');
+
+          const idConsulta = $(this).data('id');
+          $('#txtIdConsulta').val(idConsulta);
+          
+          fetch(`/api/v1/consultas/${idConsulta}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(resp => resp.json())
+          .then(data => {
+            const consulta = data.data;
+            $('#txtIdConsulta').val(consulta.id_consulta);
+            $('#id_cita').val(consulta.id_cita);
+            $('#txtCita').val(`${consulta.paciente} - Dr. ${consulta.medico} (${consulta.especialidad}) - ${consulta.fecha} ${consulta.hora}`);
+            $('#txtMotivo').val(consulta.motivo_consulta);
+            $('#txtDiagnostico').val(consulta.diagnostico);
+            $('#txtTratamiento').val(consulta.tratamiento);
+            $('#txtObservaciones').val(consulta.observaciones);
+            
+            if (consulta.id_orden_estudio) {
+              $('#id_orden_estudio').val(consulta.id_orden_estudio);
+              $('#txtOrdenEstudio').val(consulta.tipo_estudio);
+            }
+            
+            if (consulta.id_orden_analisis) {
+              $('#id_orden_analisis').val(consulta.id_orden_analisis);
+              $('#txtOrdenAnalisis').val(consulta.tipo_analisis);
+            }
+            
+            $('#modalFormulario').modal('show');
+          });
+        }
+      });
+    });
+  }
+
+  const eliminar = () => {
+    $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
+      const idConsulta = $(this).data('id');
+      Swal.fire({
+        title: "¿Deseas eliminar este registro?",
+        text: "Esta acción no se puede deshacer",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: `Cancelar`,
+        confirmButtonColor: '#dc3545'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/api/v1/consultas/${idConsulta}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(resp => resp.json())
+          .then(data => {
+            if(data && !data.error && data.success) {
+              const tabla = $('#tbl').DataTable();
+              tabla.ajax.reload();
+              Swal.fire({
+                icon: "success",
+                title: "Eliminado",
+                text: "La consulta ha sido eliminada correctamente."
+              });
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: data.error
+              });
+            }
+          }).catch(err => {
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "Ocurrió un error al eliminar la consulta."
+            });
+          });
+        }
+      });
+    });
+  }
+
+  const addEvents = () => {
+    agregar();
+    guardar();
+    editar();
+    eliminar();
+    buscarCita();
+    buscarOrdenEstudio();
+    buscarOrdenAnalisis();
+    limpiarOrdenes();
+  }
+
+  $(function() {
+    initDatatable();
+    initDatatableCita();
+    initDatatableOrdenEstudio();
+    initDatatableOrdenAnalisis();
+    addEvents();
+  }); 
+</script> 
+{% endblock %}

@@ -33,8 +33,14 @@ from app.rutas.referenciales.usuario.usuario_routes import usumod
 from app.rutas.referenciales.disponibilidad_horaria.disponibilidad_horaria_routes import disponibilidad_horariamod
 from app.rutas.referenciales.cita.cita_routes import citamod
 from app.rutas.referenciales.aviso_recordatorio.aviso_recordatorio_routes import aviso_mod
+from app.rutas.referenciales.consulta.consulta_routes import consmod
 
 # registrar los blueprints
+
+modulo0 = '/referenciales'
+app.register_blueprint(consmod, url_prefix=f'{modulo0}/consulta')
+
+from app.rutas.referenciales.consulta.consulta_api import consulta_api
 
 modulo0 = '/referenciales'
 app.register_blueprint(aviso_mod, url_prefix=f'{modulo0}/aviso_recordatorio')
@@ -135,6 +141,8 @@ from app.rutas.referenciales.cita.cita_api import cita_api
 # APIS v1
 version1 = '/api/v1'
 app.register_blueprint(ciuapi, url_prefix=version1)
+
+app.register_blueprint(consulta_api, url_prefix=version1)
 
 app.register_blueprint(aviso_api, url_prefix=version1)
 

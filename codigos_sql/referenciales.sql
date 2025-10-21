@@ -172,6 +172,7 @@ CREATE TABLE citas (
 CREATE TABLE avisos_recordatorios (
     id_aviso SERIAL PRIMARY KEY,
     id_cita INTEGER NOT NULL,  -- Foreign key a la tabla citas
+	destinatario VARCHAR(255);
     fecha_programada TIMESTAMP NOT NULL,  -- Fecha y hora en que se debe enviar el recordatorio (e.g., 24 horas antes de la cita)
     fecha_envio TIMESTAMP,  -- Fecha y hora en que se envió el recordatorio
     metodo_envio VARCHAR(50) NOT NULL,  -- Método de envío: 'email', 'sms', etc.
@@ -181,3 +182,159 @@ CREATE TABLE avisos_recordatorios (
         ON DELETE CASCADE ON UPDATE CASCADE  -- Si se elimina la cita, se elimina el recordatorio
 );
 
+-- ======================================
+-- 📋 TABLAS REFERENCIALES
+-- ======================================
+
+-- Tipos de órdenes de estudio
+CREATE TABLE IF NOT EXISTS tipo_orden_estudio (
+    id_tipo_orden_estudio SERIAL PRIMARY KEY,
+    descripcion VARCHAR(100) NOT NULL UNIQUE,
+    estado BOOLEAN DEFAULT TRUE
+);
+
+INSERT INTO tipo_orden_estudio (descripcion) VALUES 
+    ('Radiografía'),
+    ('Tomografía'),
+    ('Resonancia Magnética'),
+    ('Ecografía'),
+    ('Electrocardiograma'),
+    ('Endoscopía'),
+    ('Mamografía'),
+    ('Colonoscopía'),
+    ('Densitometría Ósea'),
+    ('Ninguno')
+ON CONFLICT (descripcion) DO NOTHING;
+
+-- Tipos de órdenes de análisis
+CREATE TABLE IF NOT EXISTS tipo_orden_analisis (
+    id_tipo_orden_analisis SERIAL PRIMARY KEY,
+    descripcion VARCHAR(100) NOT NULL UNIQUE,
+    estado BOOLEAN DEFAULT TRUE
+);
+
+INSERT INTO tipo_orden_analisis (descripcion) VALUES 
+    ('Hemograma Completo'),
+    ('Glucemia'),
+    ('Perfil Lipídico'),
+    ('Función Renal'),
+    ('Función Hepática'),
+    ('Orina Completa'),
+    ('Heces'),
+    ('Perfil Tiroideo'),
+    ('Hemoglobina Glicosilada'),
+    ('Cultivo'),
+    ('Perfil Hormonal'),
+    ('Ninguno')
+ON CONFLICT (descripcion) DO NOTHING;
+
+-- ======================================
+-- 🧾 TABLAS PRINCIPALES DE ÓRDENES
+-- ======================================
+
+-- Orden de estudio
+CREATE TABLE IF NOT EXISTS orden_estudio (
+    id_orden_estudio SERIAL PRIMARY KEY,
+    id_tipo_orden_estudio INT NOT NULL,
+    fecha_emision DATE NOT NULL DEFAULT CURRENT_DATE,
+    observacion TEXT,
+    estado VARCHAR(20) DEFAULT 'pendiente',
+    FOREIGN KEY (id_tipo_orden_estudio) REFERENCES tipo_orden_estudio(id_tipo_orden_estudio)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- Orden de análisis
+CREATE TABLE IF NOT EXISTS orden_analisis (
+    id_orden_analisis SERIAL PRIMARY KEY,
+    id_tipo_orden_analisis INT NOT NULL,
+    fecha_emision DATE NOT NULL DEFAULT CURRENT_DATE,
+    observacion TEXT,
+    estado VARCHAR(20) DEFAULT 'pendiente',
+    FOREIGN KEY (id_tipo_orden_analisis) REFERENCES tipo_orden_analisis(id_tipo_orden_analisis)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- ======================================
+-- 📋 TABLA DE CONSULTAS MÉDICAS
+-- ======================================
+
+CREATE TABLE consultas (
+    id_consulta SERIAL PRIMARY KEY,
+    id_cita INTEGER NOT NULL,
+    id_orden_estudio INTEGER,
+    id_orden_analisis INTEGER,
+    motivo_consulta TEXT NOT NULL,
+    diagnostico TEXT,
+    tratamiento TEXT,
+    observaciones TEXT,
+    fecha_consulta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (id_cita) REFERENCES citas(id_cita)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (id_orden_estudio) REFERENCES orden_estudio(id_orden_estudio)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (id_orden_analisis) REFERENCES orden_analisis(id_orden_analisis)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+        
+    CONSTRAINT uq_consulta_cita UNIQUE (id_cita) -- Una consulta por cita
+);
+
+-- Índices para mejorar el rendimiento
+CREATE INDEX idx_consultas_cita ON consultas(id_cita);
+CREATE INDEX idx_consultas_fecha ON consultas(fecha_consulta);
+
+-- Comentarios descriptivos
+COMMENT ON TABLE consultas IS 'Registro de consultas médicas realizadas';
+COMMENT ON COLUMN consultas.id_cita IS 'Cita médica asociada a la consulta';
+COMMENT ON COLUMN consultas.id_orden_estudio IS 'Orden de estudio emitida (opcional)';
+COMMENT ON COLUMN consultas.id_orden_analisis IS 'Orden de análisis emitida (opcional)';
+COMMENT ON COLUMN consultas.motivo_consulta IS 'Razón por la que el paciente consulta';
+COMMENT ON COLUMN consultas.diagnostico IS 'Diagnóstico médico del paciente';
+COMMENT ON COLUMN consultas.tratamiento IS 'Tratamiento prescrito';
+COMMENT ON COLUMN consultas.observaciones IS 'Observaciones adicionales del médico';
+ 
+ - Orden de Estudio 1 - Radiografía
+INSERT INTO orden_estudio (id_tipo_orden_estudio, fecha_emision, observacion, estado)
+VALUES (1, '2025-10-10', 'Radiografía de tórax - Control post-operatorio', 'pendiente');
+
+-- Orden de Estudio 2 - Tomografía
+INSERT INTO orden_estudio (id_tipo_orden_estudio, fecha_emision, observacion, estado)
+VALUES (2, '2025-10-12', 'Tomografía de abdomen - Sospecha de cálculos renales', 'pendiente');
+
+-- Orden de Estudio 3 - Resonancia Magnética
+INSERT INTO orden_estudio (id_tipo_orden_estudio, fecha_emision, observacion, estado)
+VALUES (3, '2025-10-13', 'Resonancia de columna lumbar - Dolor crónico', 'pendiente');
+
+-- Orden de Estudio 4 - Ecografía
+INSERT INTO orden_estudio (id_tipo_orden_estudio, fecha_emision, observacion, estado)
+VALUES (4, '2025-10-14', 'Ecografía abdominal completa - Control de rutina', 'pendiente');
+
+-- Orden de Estudio 5 - Electrocardiograma
+INSERT INTO orden_estudio (id_tipo_orden_estudio, fecha_emision, observacion, estado)
+VALUES (5, '2025-10-15', 'Electrocardiograma - Evaluación preoperatoria', 'pendiente');
+
+
+-- ======================================
+-- 🧪 INSERTS - ÓRDENES DE ANÁLISIS
+-- ======================================
+arregloo
+
+-- Orden de Análisis 1 - Hemograma Completo
+INSERT INTO orden_analisis (id_tipo_orden_analisis, fecha_emision, observacion, estado)
+VALUES (1, '2025-10-10', 'Hemograma completo - Control de anemia', 'pendiente');
+
+-- Orden de Análisis 2 - Glucemia
+INSERT INTO orden_analisis (id_tipo_orden_analisis, fecha_emision, observacion, estado)
+VALUES (2, '2025-10-11', 'Glucemia en ayunas - Evaluación de diabetes', 'pendiente');
+
+-- Orden de Análisis 3 - Perfil Lipídico
+INSERT INTO orden_analisis (id_tipo_orden_analisis, fecha_emision, observacion, estado)
+VALUES (3, '2025-10-12', 'Perfil lipídico completo - Control de colesterol', 'pendiente');
+
+-- Orden de Análisis 4 - Función Renal
+INSERT INTO orden_analisis (id_tipo_orden_analisis, fecha_emision, observacion, estado)
+VALUES (4, '2025-10-13', 'Función renal (urea y creatinina) - Control post-tratamiento', 'pendiente');
+
+-- Orden de Análisis 5 - Función Hepática
+INSERT INTO orden_analisis (id_tipo_orden_analisis, fecha_emision, observacion, estado)
+VALUES (5, '2025-10-14', 'Función hepática - Evaluación de enzimas', 'pendiente');
