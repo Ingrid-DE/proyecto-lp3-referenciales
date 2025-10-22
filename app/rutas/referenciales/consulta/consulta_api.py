@@ -84,57 +84,51 @@ def getCitasDisponibles():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Obtener órdenes de estudio disponibles
-@consulta_api.route('/consultas/ordenes-estudio-disponibles', methods=['GET'])
-def getOrdenesEstudioDisponibles():
+# Obtener tipos de orden de estudio
+@consulta_api.route('/consultas/tipos-orden-estudio', methods=['GET'])
+def getTiposOrdenEstudio():
     consultadao = ConsultaDao()
     
     try:
-        data = consultadao.getOrdenesEstudioDisponibles()
-        ordenes = []
+        data = consultadao.getTiposOrdenEstudio()
+        tipos = []
         for row in data:
-            ordenes.append({
-                'id_orden_estudio': row[0],
-                'tipo_estudio': row[1],
-                'fecha_emision': row[2].strftime('%d/%m/%Y'),
-                'observacion': row[3] if row[3] else '',
-                'estado': row[4]
+            tipos.append({
+                'id_tipo_orden_estudio': row[0],
+                'descripcion': row[1]
             })
         return jsonify({
             'success': True,
-            'data': ordenes,
+            'data': tipos,
             'error': None
         }), 200
     except Exception as e:
-        app.logger.error(f"Error al obtener órdenes de estudio: {str(e)}")
+        app.logger.error(f"Error al obtener tipos de orden de estudio: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Obtener órdenes de análisis disponibles
-@consulta_api.route('/consultas/ordenes-analisis-disponibles', methods=['GET'])
-def getOrdenesAnalisisDisponibles():
+# Obtener tipos de orden de análisis
+@consulta_api.route('/consultas/tipos-orden-analisis', methods=['GET'])
+def getTiposOrdenAnalisis():
     consultadao = ConsultaDao()
     
     try:
-        data = consultadao.getOrdenesAnalisisDisponibles()
-        ordenes = []
+        data = consultadao.getTiposOrdenAnalisis()
+        tipos = []
         for row in data:
-            ordenes.append({
-                'id_orden_analisis': row[0],
-                'tipo_analisis': row[1],
-                'fecha_emision': row[2].strftime('%d/%m/%Y'),
-                'observacion': row[3] if row[3] else '',
-                'estado': row[4]
+            tipos.append({
+                'id_tipo_orden_analisis': row[0],
+                'descripcion': row[1]
             })
         return jsonify({
             'success': True,
-            'data': ordenes,
+            'data': tipos,
             'error': None
         }), 200
     except Exception as e:
-        app.logger.error(f"Error al obtener órdenes de análisis: {str(e)}")
+        app.logger.error(f"Error al obtener tipos de orden de análisis: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
@@ -159,28 +153,27 @@ def addConsulta():
 
     try:
         id_cita = data['id_cita']
-        id_orden_estudio = data.get('id_orden_estudio', None)
-        id_orden_analisis = data.get('id_orden_analisis', None)
+        id_tipo_orden_estudio = data.get('id_tipo_orden_estudio', None)
+        fecha_emision_estudio = data.get('fecha_emision_estudio', None)
+        fecha_vencimiento_estudio = data.get('fecha_vencimiento_estudio', None)
+        id_tipo_orden_analisis = data.get('id_tipo_orden_analisis', None)
+        fecha_emision_analisis = data.get('fecha_emision_analisis', None)
+        fecha_vencimiento_analisis = data.get('fecha_vencimiento_analisis', None)
         motivo_consulta = data['motivo_consulta']
         diagnostico = data.get('diagnostico', '')
         tratamiento = data.get('tratamiento', '')
         observaciones = data.get('observaciones', '')
 
-        consulta_id = consultadao.guardarConsulta(id_cita, id_orden_estudio, id_orden_analisis, motivo_consulta, diagnostico, tratamiento, observaciones)
+        consulta_id = consultadao.guardarConsulta(
+            id_cita, id_tipo_orden_estudio, fecha_emision_estudio, fecha_vencimiento_estudio,
+            id_tipo_orden_analisis, fecha_emision_analisis, fecha_vencimiento_analisis,
+            motivo_consulta, diagnostico, tratamiento, observaciones
+        )
         
         if consulta_id:
             return jsonify({
                 'success': True,
-                'data': {
-                    'id_consulta': consulta_id,
-                    'id_cita': id_cita,
-                    'id_orden_estudio': id_orden_estudio,
-                    'id_orden_analisis': id_orden_analisis,
-                    'motivo_consulta': motivo_consulta,
-                    'diagnostico': diagnostico,
-                    'tratamiento': tratamiento,
-                    'observaciones': observaciones
-                },
+                'data': {'id_consulta': consulta_id},
                 'error': None
             }), 201
         else:
@@ -214,26 +207,25 @@ def updateConsulta(consulta_id):
 
     try:
         id_cita = data['id_cita']
-        id_orden_estudio = data.get('id_orden_estudio', None)
-        id_orden_analisis = data.get('id_orden_analisis', None)
+        id_tipo_orden_estudio = data.get('id_tipo_orden_estudio', None)
+        fecha_emision_estudio = data.get('fecha_emision_estudio', None)
+        fecha_vencimiento_estudio = data.get('fecha_vencimiento_estudio', None)
+        id_tipo_orden_analisis = data.get('id_tipo_orden_analisis', None)
+        fecha_emision_analisis = data.get('fecha_emision_analisis', None)
+        fecha_vencimiento_analisis = data.get('fecha_vencimiento_analisis', None)
         motivo_consulta = data['motivo_consulta']
         diagnostico = data.get('diagnostico', '')
         tratamiento = data.get('tratamiento', '')
         observaciones = data.get('observaciones', '')
 
-        if consultadao.updateConsulta(consulta_id, id_cita, id_orden_estudio, id_orden_analisis, motivo_consulta, diagnostico, tratamiento, observaciones):
+        if consultadao.updateConsulta(
+            consulta_id, id_cita, id_tipo_orden_estudio, fecha_emision_estudio, fecha_vencimiento_estudio,
+            id_tipo_orden_analisis, fecha_emision_analisis, fecha_vencimiento_analisis,
+            motivo_consulta, diagnostico, tratamiento, observaciones
+        ):
             return jsonify({
                 'success': True,
-                'data': {
-                    'id_consulta': consulta_id,
-                    'id_cita': id_cita,
-                    'id_orden_estudio': id_orden_estudio,
-                    'id_orden_analisis': id_orden_analisis,
-                    'motivo_consulta': motivo_consulta,
-                    'diagnostico': diagnostico,
-                    'tratamiento': tratamiento,
-                    'observaciones': observaciones
-                },
+                'data': {'id_consulta': consulta_id},
                 'error': None
             }), 200
         else:

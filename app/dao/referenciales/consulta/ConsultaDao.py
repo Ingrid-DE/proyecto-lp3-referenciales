@@ -22,7 +22,11 @@ class ConsultaDao:
             co.fecha_consulta,
             COALESCE(toe.descripcion, 'Sin orden') AS tipo_estudio,
             COALESCE(toa.descripcion, 'Sin orden') AS tipo_analisis,
-            ec.descripcion AS estado_cita
+            ec.descripcion AS estado_cita,
+            co.fecha_emision_estudio,
+            co.fecha_vencimiento_estudio,
+            co.fecha_emision_analisis,
+            co.fecha_vencimiento_analisis
         FROM consultas co
         INNER JOIN citas c ON co.id_cita = c.id_cita
         INNER JOIN pacientes pa ON c.id_paciente = pa.id_paciente
@@ -33,10 +37,8 @@ class ConsultaDao:
         INNER JOIN personas perM ON m.id_persona = perM.id_persona
         INNER JOIN especialidades e ON am.id_especialidad = e.id_especialidad
         INNER JOIN estado_citas ec ON c.id_estado_cita = ec.id_estado_cita
-        LEFT JOIN orden_estudio oe ON co.id_orden_estudio = oe.id_orden_estudio
-        LEFT JOIN tipo_orden_estudio toe ON oe.id_tipo_orden_estudio = toe.id_tipo_orden_estudio
-        LEFT JOIN orden_analisis oa ON co.id_orden_analisis = oa.id_orden_analisis
-        LEFT JOIN tipo_orden_analisis toa ON oa.id_tipo_orden_analisis = toa.id_tipo_orden_analisis
+        LEFT JOIN tipo_orden_estudio toe ON co.id_tipo_orden_estudio = toe.id_tipo_orden_estudio
+        LEFT JOIN tipo_orden_analisis toa ON co.id_tipo_orden_analisis = toa.id_tipo_orden_analisis
         ORDER BY co.fecha_consulta DESC
         """
         conexion = Conexion()
@@ -60,7 +62,11 @@ class ConsultaDao:
                 'fecha_consulta': consulta[11].strftime('%d/%m/%Y %H:%M') if consulta[11] else '',
                 'tipo_estudio': consulta[12],
                 'tipo_analisis': consulta[13],
-                'estado_cita': consulta[14]
+                'estado_cita': consulta[14],
+                'fecha_emision_estudio': consulta[15].strftime('%d/%m/%Y') if consulta[15] else '',
+                'fecha_vencimiento_estudio': consulta[16].strftime('%d/%m/%Y') if consulta[16] else '',
+                'fecha_emision_analisis': consulta[17].strftime('%d/%m/%Y') if consulta[17] else '',
+                'fecha_vencimiento_analisis': consulta[18].strftime('%d/%m/%Y') if consulta[18] else ''
             } for consulta in consultas]
         
         except Exception as e:
@@ -86,10 +92,14 @@ class ConsultaDao:
             co.tratamiento,
             co.observaciones,
             co.fecha_consulta,
-            co.id_orden_estudio,
-            co.id_orden_analisis,
+            co.id_tipo_orden_estudio,
+            co.id_tipo_orden_analisis,
             COALESCE(toe.descripcion, 'Sin orden') AS tipo_estudio,
-            COALESCE(toa.descripcion, 'Sin orden') AS tipo_analisis
+            COALESCE(toa.descripcion, 'Sin orden') AS tipo_analisis,
+            co.fecha_emision_estudio,
+            co.fecha_vencimiento_estudio,
+            co.fecha_emision_analisis,
+            co.fecha_vencimiento_analisis
         FROM consultas co
         INNER JOIN citas c ON co.id_cita = c.id_cita
         INNER JOIN pacientes pa ON c.id_paciente = pa.id_paciente
@@ -99,10 +109,8 @@ class ConsultaDao:
         INNER JOIN medicos m ON am.id_medico = m.id_medico
         INNER JOIN personas perM ON m.id_persona = perM.id_persona
         INNER JOIN especialidades e ON am.id_especialidad = e.id_especialidad
-        LEFT JOIN orden_estudio oe ON co.id_orden_estudio = oe.id_orden_estudio
-        LEFT JOIN tipo_orden_estudio toe ON oe.id_tipo_orden_estudio = toe.id_tipo_orden_estudio
-        LEFT JOIN orden_analisis oa ON co.id_orden_analisis = oa.id_orden_analisis
-        LEFT JOIN tipo_orden_analisis toa ON oa.id_tipo_orden_analisis = toa.id_tipo_orden_analisis
+        LEFT JOIN tipo_orden_estudio toe ON co.id_tipo_orden_estudio = toe.id_tipo_orden_estudio
+        LEFT JOIN tipo_orden_analisis toa ON co.id_tipo_orden_analisis = toa.id_tipo_orden_analisis
         WHERE co.id_consulta = %s
         """
         conexion = Conexion()
@@ -125,10 +133,14 @@ class ConsultaDao:
                     "tratamiento": consultaEncontrada[9],
                     "observaciones": consultaEncontrada[10],
                     "fecha_consulta": consultaEncontrada[11].strftime('%Y-%m-%dT%H:%M') if consultaEncontrada[11] else '',
-                    "id_orden_estudio": consultaEncontrada[12],
-                    "id_orden_analisis": consultaEncontrada[13],
+                    "id_tipo_orden_estudio": consultaEncontrada[12],
+                    "id_tipo_orden_analisis": consultaEncontrada[13],
                     "tipo_estudio": consultaEncontrada[14],
-                    "tipo_analisis": consultaEncontrada[15]
+                    "tipo_analisis": consultaEncontrada[15],
+                    "fecha_emision_estudio": consultaEncontrada[16].strftime('%Y-%m-%d') if consultaEncontrada[16] else '',
+                    "fecha_vencimiento_estudio": consultaEncontrada[17].strftime('%Y-%m-%d') if consultaEncontrada[17] else '',
+                    "fecha_emision_analisis": consultaEncontrada[18].strftime('%Y-%m-%d') if consultaEncontrada[18] else '',
+                    "fecha_vencimiento_analisis": consultaEncontrada[19].strftime('%Y-%m-%d') if consultaEncontrada[19] else ''
                 }
             else:
                 return None
@@ -179,73 +191,73 @@ class ConsultaDao:
             cur.close()
             con.close()
 
-    def getOrdenesEstudioDisponibles(self):
-        """Obtiene TODAS las órdenes de estudio disponibles"""
-        ordenesSQL = """
-        SELECT 
-            oe.id_orden_estudio,
-            toe.descripcion,
-            oe.fecha_emision,
-            oe.observacion,
-            oe.estado
-        FROM orden_estudio oe
-        INNER JOIN tipo_orden_estudio toe ON oe.id_tipo_orden_estudio = toe.id_tipo_orden_estudio
-        ORDER BY oe.fecha_emision DESC
+    def getTiposOrdenEstudio(self):
+        """Obtiene todos los tipos de orden de estudio"""
+        sql = """
+        SELECT id_tipo_orden_estudio, descripcion
+        FROM tipo_orden_estudio
+        WHERE estado = TRUE
+        ORDER BY descripcion
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(ordenesSQL)
+            cur.execute(sql)
             return cur.fetchall()
         except Exception as e:
-            app.logger.error(f"Error al obtener órdenes de estudio: {str(e)}")
+            app.logger.error(f"Error al obtener tipos de orden de estudio: {str(e)}")
             return []
         finally:
             cur.close()
             con.close()
 
-    def getOrdenesAnalisisDisponibles(self):
-        """Obtiene TODAS las órdenes de análisis disponibles"""
-        ordenesSQL = """
-        SELECT 
-            oa.id_orden_analisis,
-            toa.descripcion,
-            oa.fecha_emision,
-            oa.observacion,
-            oa.estado
-        FROM orden_analisis oa
-        INNER JOIN tipo_orden_analisis toa ON oa.id_tipo_orden_analisis = toa.id_tipo_orden_analisis
-        ORDER BY oa.fecha_emision DESC
+    def getTiposOrdenAnalisis(self):
+        """Obtiene todos los tipos de orden de análisis"""
+        sql = """
+        SELECT id_tipo_orden_analisis, descripcion
+        FROM tipo_orden_analisis
+        WHERE estado = TRUE
+        ORDER BY descripcion
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(ordenesSQL)
+            cur.execute(sql)
             return cur.fetchall()
         except Exception as e:
-            app.logger.error(f"Error al obtener órdenes de análisis: {str(e)}")
+            app.logger.error(f"Error al obtener tipos de orden de análisis: {str(e)}")
             return []
         finally:
             cur.close()
             con.close()
 
-    def guardarConsulta(self, id_cita, id_orden_estudio, id_orden_analisis, motivo_consulta, diagnostico, tratamiento, observaciones):
+    def guardarConsulta(self, id_cita, id_tipo_orden_estudio, fecha_emision_estudio, fecha_vencimiento_estudio, 
+                       id_tipo_orden_analisis, fecha_emision_analisis, fecha_vencimiento_analisis,
+                       motivo_consulta, diagnostico, tratamiento, observaciones):
         """Guarda una nueva consulta médica"""
         insertConsultaSQL = """
-        INSERT INTO consultas(id_cita, id_orden_estudio, id_orden_analisis, motivo_consulta, diagnostico, tratamiento, observaciones)
-        VALUES(%s, %s, %s, %s, %s, %s, %s) RETURNING id_consulta
+        INSERT INTO consultas(id_cita, id_tipo_orden_estudio, fecha_emision_estudio, fecha_vencimiento_estudio,
+                             id_tipo_orden_analisis, fecha_emision_analisis, fecha_vencimiento_analisis,
+                             motivo_consulta, diagnostico, tratamiento, observaciones)
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id_consulta
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
             # Convertir valores vacíos a NULL
-            id_orden_estudio = id_orden_estudio if id_orden_estudio else None
-            id_orden_analisis = id_orden_analisis if id_orden_analisis else None
+            id_tipo_orden_estudio = id_tipo_orden_estudio if id_tipo_orden_estudio else None
+            fecha_emision_estudio = fecha_emision_estudio if fecha_emision_estudio else None
+            fecha_vencimiento_estudio = fecha_vencimiento_estudio if fecha_vencimiento_estudio else None
+            id_tipo_orden_analisis = id_tipo_orden_analisis if id_tipo_orden_analisis else None
+            fecha_emision_analisis = fecha_emision_analisis if fecha_emision_analisis else None
+            fecha_vencimiento_analisis = fecha_vencimiento_analisis if fecha_vencimiento_analisis else None
             
-            cur.execute(insertConsultaSQL, (id_cita, id_orden_estudio, id_orden_analisis, motivo_consulta, diagnostico, tratamiento, observaciones))
+            cur.execute(insertConsultaSQL, (id_cita, id_tipo_orden_estudio, fecha_emision_estudio, fecha_vencimiento_estudio,
+                                           id_tipo_orden_analisis, fecha_emision_analisis, fecha_vencimiento_analisis,
+                                           motivo_consulta, diagnostico, tratamiento, observaciones))
             consulta_id = cur.fetchone()[0]
             con.commit()
             return consulta_id
@@ -257,11 +269,15 @@ class ConsultaDao:
             cur.close()
             con.close()
 
-    def updateConsulta(self, id_consulta, id_cita, id_orden_estudio, id_orden_analisis, motivo_consulta, diagnostico, tratamiento, observaciones):
+    def updateConsulta(self, id_consulta, id_cita, id_tipo_orden_estudio, fecha_emision_estudio, fecha_vencimiento_estudio,
+                      id_tipo_orden_analisis, fecha_emision_analisis, fecha_vencimiento_analisis,
+                      motivo_consulta, diagnostico, tratamiento, observaciones):
         """Actualiza una consulta existente"""
         updateConsultaSQL = """
         UPDATE consultas
-        SET id_cita=%s, id_orden_estudio=%s, id_orden_analisis=%s, motivo_consulta=%s, diagnostico=%s, tratamiento=%s, observaciones=%s
+        SET id_cita=%s, id_tipo_orden_estudio=%s, fecha_emision_estudio=%s, fecha_vencimiento_estudio=%s,
+            id_tipo_orden_analisis=%s, fecha_emision_analisis=%s, fecha_vencimiento_analisis=%s,
+            motivo_consulta=%s, diagnostico=%s, tratamiento=%s, observaciones=%s
         WHERE id_consulta=%s
         """
         conexion = Conexion()
@@ -269,10 +285,16 @@ class ConsultaDao:
         cur = con.cursor()
         try:
             # Convertir valores vacíos a NULL
-            id_orden_estudio = id_orden_estudio if id_orden_estudio else None
-            id_orden_analisis = id_orden_analisis if id_orden_analisis else None
+            id_tipo_orden_estudio = id_tipo_orden_estudio if id_tipo_orden_estudio else None
+            fecha_emision_estudio = fecha_emision_estudio if fecha_emision_estudio else None
+            fecha_vencimiento_estudio = fecha_vencimiento_estudio if fecha_vencimiento_estudio else None
+            id_tipo_orden_analisis = id_tipo_orden_analisis if id_tipo_orden_analisis else None
+            fecha_emision_analisis = fecha_emision_analisis if fecha_emision_analisis else None
+            fecha_vencimiento_analisis = fecha_vencimiento_analisis if fecha_vencimiento_analisis else None
             
-            cur.execute(updateConsultaSQL, (id_cita, id_orden_estudio, id_orden_analisis, motivo_consulta, diagnostico, tratamiento, observaciones, id_consulta))
+            cur.execute(updateConsultaSQL, (id_cita, id_tipo_orden_estudio, fecha_emision_estudio, fecha_vencimiento_estudio,
+                                           id_tipo_orden_analisis, fecha_emision_analisis, fecha_vencimiento_analisis,
+                                           motivo_consulta, diagnostico, tratamiento, observaciones, id_consulta))
             filas_afectadas = cur.rowcount
             con.commit()
             return filas_afectadas > 0

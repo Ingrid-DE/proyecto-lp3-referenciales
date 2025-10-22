@@ -338,3 +338,54 @@ VALUES (4, '2025-10-13', 'Función renal (urea y creatinina) - Control post-trat
 -- Orden de Análisis 5 - Función Hepática
 INSERT INTO orden_analisis (id_tipo_orden_analisis, fecha_emision, observacion, estado)
 VALUES (5, '2025-10-14', 'Función hepática - Evaluación de enzimas', 'pendiente');
+
+-- ======================================
+-- 📋 TABLA DE CONSULTAS MÉDICAS (MODIFICADA)
+-- ======================================
+
+-- PRIMERO: Eliminar la tabla anterior si existe
+DROP TABLE IF EXISTS consultas CASCADE;
+
+-- CREAR TABLA CON LOS NUEVOS CAMPOS
+CREATE TABLE consultas (
+    id_consulta SERIAL PRIMARY KEY,
+    id_cita INTEGER NOT NULL,
+    id_tipo_orden_estudio INTEGER,
+    fecha_emision_estudio DATE,
+    fecha_vencimiento_estudio DATE,
+    id_tipo_orden_analisis INTEGER,
+    fecha_emision_analisis DATE,
+    fecha_vencimiento_analisis DATE,
+    motivo_consulta TEXT NOT NULL,
+    diagnostico TEXT,
+    tratamiento TEXT,
+    observaciones TEXT,
+    fecha_consulta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (id_cita) REFERENCES citas(id_cita)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (id_tipo_orden_estudio) REFERENCES tipo_orden_estudio(id_tipo_orden_estudio)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (id_tipo_orden_analisis) REFERENCES tipo_orden_analisis(id_tipo_orden_analisis)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+        
+    CONSTRAINT uq_consulta_cita UNIQUE (id_cita) -- Una consulta por cita
+);
+
+-- Índices para mejorar el rendimiento
+CREATE INDEX idx_consultas_cita ON consultas(id_cita);
+CREATE INDEX idx_consultas_fecha ON consultas(fecha_consulta);
+
+-- Comentarios descriptivos
+COMMENT ON TABLE consultas IS 'Registro de consultas médicas realizadas';
+COMMENT ON COLUMN consultas.id_cita IS 'Cita médica asociada a la consulta';
+COMMENT ON COLUMN consultas.id_tipo_orden_estudio IS 'Tipo de orden de estudio emitida (opcional)';
+COMMENT ON COLUMN consultas.fecha_emision_estudio IS 'Fecha de emisión de la orden de estudio';
+COMMENT ON COLUMN consultas.fecha_vencimiento_estudio IS 'Fecha de vencimiento de la orden de estudio';
+COMMENT ON COLUMN consultas.id_tipo_orden_analisis IS 'Tipo de orden de análisis emitida (opcional)';
+COMMENT ON COLUMN consultas.fecha_emision_analisis IS 'Fecha de emisión de la orden de análisis';
+COMMENT ON COLUMN consultas.fecha_vencimiento_analisis IS 'Fecha de vencimiento de la orden de análisis';
+COMMENT ON COLUMN consultas.motivo_consulta IS 'Razón por la que el paciente consulta';
+COMMENT ON COLUMN consultas.diagnostico IS 'Diagnóstico médico del paciente';
+COMMENT ON COLUMN consultas.tratamiento IS 'Tratamiento prescrito';
+COMMENT ON COLUMN consultas.observaciones IS 'Observaciones adicionales del médico';
