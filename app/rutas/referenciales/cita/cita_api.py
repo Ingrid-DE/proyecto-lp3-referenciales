@@ -96,7 +96,8 @@ def addCita():
         id_estado_cita = data['id_estado_cita']
 
         cita_id = citadao.guardarCita(id_disponibilidad_horaria, id_paciente, observacion, id_estado_cita)
-        if cita_id is not None:
+        
+        if cita_id is not None and cita_id is not False:
             return jsonify({
                 'success': True,
                 'data': {
@@ -111,8 +112,8 @@ def addCita():
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se pudo guardar la cita. Consulte con el administrador.'
-            }), 500
+                'error': 'No se pudo guardar la cita. La disponibilidad horaria puede estar ocupada.'
+            }), 400
     except Exception as e:
         app.logger.error(f"Error al agregar cita: {str(e)}")
         return jsonify({
@@ -158,7 +159,7 @@ def updateCita(cita_id):
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la cita con el ID proporcionado o no se pudo actualizar.'
+                'error': 'No se encontró la cita o la nueva disponibilidad horaria no está disponible.'
             }), 404
     except Exception as e:
         app.logger.error(f"Error al actualizar cita: {str(e)}")
@@ -177,7 +178,7 @@ def deleteCita(cita_id):
         if citadao.deleteCita(cita_id):
             return jsonify({
                 'success': True,
-                'mensaje': f'Cita con ID {cita_id} eliminada correctamente.',
+                'mensaje': f'Cita con ID {cita_id} eliminada correctamente y disponibilidad liberada.',
                 'error': None
             }), 200
         else:

@@ -121,16 +121,40 @@ class CitaDao:
             con.close()
 
     def guardarCita(self, id_disponibilidad_horaria, id_paciente, observacion, id_estado_cita):
+        """Guarda una cita y marca la disponibilidad como NO DISPONIBLE"""
         insertCitaSQL = """
         INSERT INTO citas(id_disponibilidad_horaria, id_paciente, observacion, id_estado_cita) 
         VALUES(%s, %s, %s, %s) RETURNING id_cita
+        """
+        updateDisponibilidadSQL = """
+        UPDATE disponibilidad_horaria
+        SET estado = FALSE
+        WHERE id_disponibilidad_horaria = %s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
+            # 1. Verificar que la disponibilidad esté disponible
+            cur.execute("SELECT estado FROM disponibilidad_horaria WHERE id_disponibilidad_horaria = %s", 
+                       (id_disponibilidad_horaria,))
+            resultado = cur.fetchone()
+            
+            if not resultado:
+                app.logger.error("La disponibilidad horaria no existe")
+                return False
+                
+            if not resultado[0]:  # Si estado es FALSE
+                app.logger.error("La disponibilidad horaria ya está ocupada")
+                return False
+            
+            # 2. Insertar la cita
             cur.execute(insertCitaSQL, (id_disponibilidad_horaria, id_paciente, observacion, id_estado_cita))
             cita_id = cur.fetchone()[0]
+            
+            # 3. Marcar la disponibilidad como NO DISPONIBLE
+            cur.execute(updateDisponibilidadSQL, (id_disponibilidad_horaria,))
+            
             con.commit()
             return cita_id
         except Exception as e:
@@ -142,17 +166,59 @@ class CitaDao:
             con.close()
 
     def updateCita(self, id_cita, id_disponibilidad_horaria, id_paciente, observacion, id_estado_cita):
+        """Actualiza una cita y gestiona la disponibilidad horaria"""
+        # Primero obtener la disponibilidad horaria anterior
+        getDisponibilidadAnteriorSQL = """
+        SELECT id_disponibilidad_horaria FROM citas WHERE id_cita = %s
+        """
         updateCitaSQL = """
         UPDATE citas
         SET id_disponibilidad_horaria=%s, id_paciente=%s, observacion=%s, id_estado_cita=%s
         WHERE id_cita=%s
         """
+        liberarDisponibilidadSQL = """
+        UPDATE disponibilidad_horaria
+        SET estado = TRUE
+        WHERE id_disponibilidad_horaria = %s
+        """
+        ocuparDisponibilidadSQL = """
+        UPDATE disponibilidad_horaria
+        SET estado = FALSE
+        WHERE id_disponibilidad_horaria = %s
+        """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
+            # 1. Obtener disponibilidad anterior
+            cur.execute(getDisponibilidadAnteriorSQL, (id_cita,))
+            resultado = cur.fetchone()
+            if not resultado:
+                return False
+            
+            id_disponibilidad_anterior = resultado[0]
+            
+            # 2. Si cambió la disponibilidad horaria
+            if id_disponibilidad_anterior != id_disponibilidad_horaria:
+                # Verificar que la nueva disponibilidad esté libre
+                cur.execute("SELECT estado FROM disponibilidad_horaria WHERE id_disponibilidad_horaria = %s", 
+                           (id_disponibilidad_horaria,))
+                nueva_disponibilidad = cur.fetchone()
+                
+                if not nueva_disponibilidad or not nueva_disponibilidad[0]:
+                    app.logger.error("La nueva disponibilidad no está disponible")
+                    return False
+                
+                # Liberar la disponibilidad anterior
+                cur.execute(liberarDisponibilidadSQL, (id_disponibilidad_anterior,))
+                
+                # Ocupar la nueva disponibilidad
+                cur.execute(ocuparDisponibilidadSQL, (id_disponibilidad_horaria,))
+            
+            # 3. Actualizar la cita
             cur.execute(updateCitaSQL, (id_disponibilidad_horaria, id_paciente, observacion, id_estado_cita, id_cita))
             filas_afectadas = cur.rowcount
+            
             con.commit()
             return filas_afectadas > 0
         except Exception as e:
@@ -164,16 +230,40 @@ class CitaDao:
             con.close()
 
     def deleteCita(self, id_cita):
+        """Elimina una cita y LIBERA la disponibilidad horaria"""
+        # Primero obtener la disponibilidad horaria
+        getDisponibilidadSQL = """
+        SELECT id_disponibilidad_horaria FROM citas WHERE id_cita = %s
+        """
         deleteCitaSQL = """
-        DELETE FROM citas
-        WHERE id_cita=%s
+        DELETE FROM citas WHERE id_cita=%s
+        """
+        liberarDisponibilidadSQL = """
+        UPDATE disponibilidad_horaria
+        SET estado = TRUE
+        WHERE id_disponibilidad_horaria = %s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
+            # 1. Obtener la disponibilidad horaria de la cita
+            cur.execute(getDisponibilidadSQL, (id_cita,))
+            resultado = cur.fetchone()
+            
+            if not resultado:
+                return False
+            
+            id_disponibilidad_horaria = resultado[0]
+            
+            # 2. Eliminar la cita
             cur.execute(deleteCitaSQL, (id_cita,))
             rows_affected = cur.rowcount
+            
+            # 3. Liberar la disponibilidad horaria (marcar como disponible)
+            if rows_affected > 0:
+                cur.execute(liberarDisponibilidadSQL, (id_disponibilidad_horaria,))
+            
             con.commit()
             return rows_affected > 0
         except Exception as e:
